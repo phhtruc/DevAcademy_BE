@@ -1,0 +1,21 @@
+server:
+  port: 8001
+spring:
+  config:
+    activate:
+      on-profile: stg
+  datasource:
+    url: jdbc:mysql://localhost:3306/techlearn
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    locations: classpath:/db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
