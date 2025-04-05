@@ -5,8 +5,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Where;
 
-import java.util.UUID;
-
 @Entity
 @Getter
 @Setter
@@ -14,26 +12,22 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Where(clause = "is_deleted = false")
-@Table(name = "NGUOIDUNG")
+@Table(name = "LUOTTHICHBINHLUAN")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserEntity extends BaseEntity {
+public class CommentLikeEntity extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
-
-    @Column(name = "hoTen")
-    String fullName;
-
-    String email;
-
-    @Column(name = "matKhau")
-    String password;
-
-    @Column(name = "anhDaiDien")
-    String avatar;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
 
     @Column(name = "xoa")
     Boolean isDeleted;
 
+    @ManyToOne()
+    @JoinColumn(name = "idNguoiDung")
+    UserEntity user;
+
+    @ManyToOne()
+    @JoinColumn(name = "idBinhLuan")
+    CommentEntity commentEntity;
 }

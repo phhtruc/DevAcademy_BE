@@ -1,6 +1,5 @@
 package com.devacademy.DevAcademy_BE.dto.userDTO;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserRequestDTO {
     //@NotBlank(message = "FULL_NAME_INVALID")
-    String hoTen;
+    String fullName;
     //@NotBlank(message = "age not blank")
     String email;
 }
