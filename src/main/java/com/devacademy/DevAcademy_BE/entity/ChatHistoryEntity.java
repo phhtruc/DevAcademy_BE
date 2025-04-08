@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Where(clause = "is_deleted = false")
+@Where(clause = "xoa = false")
 @Table(name = "LICHSU_CHAT_AI")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChatHistoryEntity extends BaseEntity {

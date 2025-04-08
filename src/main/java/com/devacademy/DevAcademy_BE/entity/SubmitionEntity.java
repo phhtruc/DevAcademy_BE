@@ -12,7 +12,7 @@ import org.hibernate.annotations.Where;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Where(clause = "is_deleted = false")
+@Where(clause = "xoa = false")
 @Table(name = "BAINOP")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SubmitionEntity extends BaseEntity {

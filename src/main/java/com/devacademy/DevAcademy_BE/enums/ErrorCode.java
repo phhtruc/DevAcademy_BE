@@ -22,6 +22,17 @@ public enum ErrorCode {
     INVALID_DATA(1014, "Invalid data", HttpStatus.BAD_REQUEST),
     REVIEW_NOT_FOUND(1020, "Review not found", HttpStatus.BAD_REQUEST),
 
+    // Auth and User 1***
+    EMAIL_INVALID(1000, "Email invalid", HttpStatus.BAD_REQUEST),
+    PASSWORD_INVALID(1001, "Password must be not blank", HttpStatus.BAD_REQUEST),
+    PLATFORM_INVALID(1002, "Platform must be not null", HttpStatus.BAD_REQUEST),
+    FULL_NAME_INVALID(1003, "Full name must be not null", HttpStatus.BAD_REQUEST),
+    USER_NOT_FOUND(1004, "User not found", HttpStatus.BAD_REQUEST),
+    EMAIL_EXISTS(1004, "Email exists", HttpStatus.BAD_REQUEST),
+
+    //Role 2***
+    ROLE_NAME_NOT_FOUND(2000, "Role name not found", HttpStatus.BAD_REQUEST),
+
     ;
     Integer code;
     String message;

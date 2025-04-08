@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Where(clause = "is_deleted = false")
+@Where(clause = "xoa = false")
 @Table(name = "THANHTOAN")
 public class CoursePayEntity extends BaseEntity {
 

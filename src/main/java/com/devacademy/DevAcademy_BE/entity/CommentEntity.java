@@ -11,7 +11,7 @@ import org.hibernate.annotations.Where;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Where(clause = "is_deleted = false")
+@Where(clause = "xoa = false")
 @Table(name = "BINHLUAN")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentEntity extends BaseEntity {

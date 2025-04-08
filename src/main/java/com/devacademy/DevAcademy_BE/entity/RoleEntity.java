@@ -4,6 +4,7 @@ import com.devacademy.DevAcademy_BE.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "VAITRO")
@@ -12,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Where(clause = "xoa = false")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleEntity extends BaseEntity {
     @Id

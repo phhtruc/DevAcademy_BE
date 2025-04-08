@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -37,11 +36,6 @@ public class UserController {
         return JsonResponse.ok(userService.addUser(request));
     }
 
-//    @PostMapping
-//    public ResponseEntity<?> addUser(@RequestParam(value = "avatar", required = false) MultipartFile multipartFile,
-//                                     @ModelAttribute @Valid UserRequestDTO request) {
-//        return JsonResponse.ok(userService.createUser(request,multipartFile));
-//    }
 //
 //    @PutMapping("/{id}")
 //    public ResponseEntity<?> updateUser(@PathVariable UUID id, @RequestParam(value = "avatar", required = false) MultipartFile multipartFile,
