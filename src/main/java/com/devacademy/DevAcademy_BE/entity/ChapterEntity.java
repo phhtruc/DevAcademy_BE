@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Where(clause = "is_deleted = false")
+@Where(clause = "xoa = false")
 @Table(name = "CHUONG")
 public class ChapterEntity extends BaseEntity {
 

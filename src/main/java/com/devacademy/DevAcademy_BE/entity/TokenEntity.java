@@ -15,7 +15,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "TOKEN")
-@Where(clause = "is_deleted = false")
+@Where(clause = "xoa = false")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TokenEntity extends BaseEntity {
 
@@ -31,10 +31,10 @@ public class TokenEntity extends BaseEntity {
     TokenType tokenType;
 
     @Column(name = "daHetHan")
-    Boolean expored;
+    boolean expired;
 
     @Column(name = "biThuHoi")
-    Boolean revoked;
+    boolean revoked;
 
     @Column(name = "xoa")
     Boolean isDeleted;

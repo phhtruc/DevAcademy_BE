@@ -12,7 +12,7 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Where(clause = "is_deleted = false")
+@Where(clause = "xoa = false")
 @Table(name = "CAUHINHPROMPT")
 public class PromptEntity extends BaseEntity {
 
