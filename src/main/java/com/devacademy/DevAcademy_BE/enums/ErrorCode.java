@@ -33,6 +33,18 @@ public enum ErrorCode {
     //Role 2***
     ROLE_NAME_NOT_FOUND(2000, "Role name not found", HttpStatus.BAD_REQUEST),
 
+    // error code course: 1700**
+    COURSE_NOT_EXISTED(170001, "Course not existed", HttpStatus.NOT_FOUND),
+    COURSE_NAME_INVALID(170002, "Course name must be not blank", HttpStatus.NOT_FOUND),
+    COURSE_PRICE_INVALID(170003, "Course price must be not blank", HttpStatus.NOT_FOUND),
+    COURSE_THUMBNAIL_URL_INVALID(170004, "Course thumbnail url must be not blank", HttpStatus.NOT_FOUND),
+    COURSE_DESCRIPTION_INVALID(170006, "Course description must be not blank", HttpStatus.NOT_FOUND),
+    COURSE_UNIT_INVALID(170007, "Course currency unit must be not blank", HttpStatus.NOT_FOUND),
+    COURSE_IS_PUBLIC_INVALID(170009, "Course is public must be not blank", HttpStatus.NOT_FOUND),
+    COURSE_IS_PUBLIC_INVALID_TYPE(170012, "The course is public must be false or true", HttpStatus.NOT_FOUND),
+    COURSE_TECH_STACK_INVALID(170013, "Course is tech stack must be not null", HttpStatus.NOT_FOUND),
+    TECH_STACK_NOT_EXISTED(170014, "Tech stack not exists", HttpStatus.NOT_FOUND),
+
     ;
     Integer code;
     String message;
