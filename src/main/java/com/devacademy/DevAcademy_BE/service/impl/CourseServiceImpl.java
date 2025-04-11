@@ -41,23 +41,24 @@ public class CourseServiceImpl implements CourseService {
     CourseHasTechStackRepository courseHasTechStackRepository;
     CloudinaryService cloudinaryService;
 
-//    @Override
-//    public PageResponse<?> getAllCourse(int page, int size) {
-//        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, size);
-//        Page<CourseEntity> course = courseRepository.findAll(pageable);
-//        List<CourseResponseDTO> list = course.map(courseMapper::toCourseResponseDTO)
-//                .stream().collect(Collectors.toList());
-//        return PageResponse.builder()
-//                .page(page)
-//                .pageSize(size)
-//                .totalPage(course.getTotalPages())
-//                .items(list)
-//                .build();
-//    }
-
     @Override
     public PageResponse<?> getAllCourse(int page, int size) {
-        return null;
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, size);
+        Page<CourseEntity> course = courseRepository.findAll(pageable);
+
+        List<CourseResponseDTO> list = course.stream()
+                .map(courseEntity -> {
+                        var listTechStack = getTechStacksByCourse(courseEntity);
+                        return courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
+                })
+                .collect(Collectors.toList());
+
+        return PageResponse.builder()
+                .page(page)
+                .pageSize(size)
+                .totalPage(course.getTotalPages())
+                .items(list)
+                .build();
     }
 
     @Override
@@ -169,6 +170,13 @@ public class CourseServiceImpl implements CourseService {
                         .orElseThrow(() -> new ApiException(ErrorCode.TECH_STACK_NOT_EXISTED)))
                 .collect(Collectors.toList());
     }
+
+    private List<TechStackEntity> getTechStacksByCourse(CourseEntity course) {
+        return courseHasTechStackRepository.findByCourseEntityId(course.getId()).stream()
+                .map(CourseHasTechStackEntity::getTechStackEntity)
+                .toList();
+    }
+
 //
 //    private List<TeacherEntity> getTeacherEntities(CourseRequestDTO requestDTO) {
 //        return requestDTO.getTeacher().stream()
