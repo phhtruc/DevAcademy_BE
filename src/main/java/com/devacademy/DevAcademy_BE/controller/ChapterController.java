@@ -3,6 +3,7 @@ package com.devacademy.DevAcademy_BE.controller;
 import com.devacademy.DevAcademy_BE.dto.OrderDTO;
 import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterRequestDTO;
 import com.devacademy.DevAcademy_BE.service.ChapterService;
+import com.devacademy.DevAcademy_BE.service.LessonService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -20,24 +21,19 @@ import java.util.List;
 public class ChapterController {
 
     ChapterService chapterService;
-    //LessonService lessonService;
+    LessonService lessonService;
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getChapterById(@PathVariable Long id) {
         return JsonResponse.ok(chapterService.getChapterById(id));
     }
-//
-//    @GetMapping("/{id}/assignment")
-//    public ResponseEntity<?> getAssignmentByIdChapter(@PathVariable Long id) {
-//        return JsonResponse.ok(lessonService.getAssignmentByIdChapter(id));
-//    }
-//
-//    @GetMapping("/{idChapter}/lessons")
-//    public ResponseEntity<?> getLessonsByIdChapter(@RequestParam(required = false, defaultValue = "1") int page,
-//                                                   @RequestParam(required = false, defaultValue = "10") int pageSize,
-//                                                   @PathVariable Long idChapter) {
-//        return JsonResponse.ok(lessonService.getLessonsByIdChapter(page, pageSize, idChapter));
-//    }
+
+    @GetMapping("/{idChapter}/lessons")
+    public ResponseEntity<?> getLessonsByIdChapter(@RequestParam(required = false, defaultValue = "1") int page,
+                                                   @RequestParam(required = false, defaultValue = "10") int pageSize,
+                                                   @PathVariable Long idChapter) {
+        return JsonResponse.ok(lessonService.getLessonsByIdChapter(page, pageSize, idChapter));
+    }
 
     @PostMapping
     public ResponseEntity<?> addChapter(@RequestBody @Valid ChapterRequestDTO request) {
