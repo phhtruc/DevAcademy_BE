@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
     @Query("SELECT c FROM CourseEntity c WHERE c.isPublic = true ORDER BY c.id ASC")
-    Page<CourseEntity> findAllActiveCourses(Pageable pageable);
+    Page<CourseEntity> findAllPublicCourses(Pageable pageable);
 }

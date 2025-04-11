@@ -1,7 +1,5 @@
 package com.devacademy.DevAcademy_BE.service.impl;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseResponseDTO;
@@ -46,19 +44,7 @@ public class CourseServiceImpl implements CourseService {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, size);
         Page<CourseEntity> course = courseRepository.findAll(pageable);
 
-        List<CourseResponseDTO> list = course.stream()
-                .map(courseEntity -> {
-                        var listTechStack = getTechStacksByCourse(courseEntity);
-                        return courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
-                })
-                .collect(Collectors.toList());
-
-        return PageResponse.builder()
-                .page(page)
-                .pageSize(size)
-                .totalPage(course.getTotalPages())
-                .items(list)
-                .build();
+        return getPageResponse(page, size, course);
     }
 
     @Override
@@ -135,11 +121,6 @@ public class CourseServiceImpl implements CourseService {
         return List.of();
     }
 
-    @Override
-    public PageResponse<?> getAllCourseForUser(int page, int pageSize) {
-        return null;
-    }
-
 //    @Override
 //    public List<CourseResponseDTO> getCourseByListId(List<Long> id) {
 //        var courses = courseRepository.findAllById(id);
@@ -150,19 +131,29 @@ public class CourseServiceImpl implements CourseService {
 //                .collect(Collectors.toList());
 //    }
 //
-//    @Override
-//    public PageResponse<?> getAllCourseForUser(int page, int pageSize) {
-//        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
-//        Page<CourseEntity> course = courseRepository.findAllActiveCourses(pageable);
-//        List<CourseResponseDTO> list = course.map(courseMapper::toCourseResponseDTO)
-//                .stream().collect(Collectors.toList());
-//        return PageResponse.builder()
-//                .page(page)
-//                .pageSize(pageSize)
-//                .totalPage(course.getTotalPages())
-//                .items(list)
-//                .build();
-//    }
+    @Override
+    public PageResponse<?> getAllCourseForUser(int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
+        Page<CourseEntity> course = courseRepository.findAllPublicCourses(pageable);
+
+        return getPageResponse(page, pageSize, course);
+    }
+
+    private PageResponse<?> getPageResponse(int page, int pageSize, Page<CourseEntity> course) {
+        List<CourseResponseDTO> list = course.stream()
+                .map(courseEntity -> {
+                    var listTechStack = getTechStacksByCourse(courseEntity);
+                    return courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
+                })
+                .collect(Collectors.toList());
+
+        return PageResponse.builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalPage(course.getTotalPages())
+                .items(list)
+                .build();
+    }
 
     private List<TechStackEntity> getTechStackEntities(CourseRequestDTO requestDTO) {
         return requestDTO.getTechStack().stream()
