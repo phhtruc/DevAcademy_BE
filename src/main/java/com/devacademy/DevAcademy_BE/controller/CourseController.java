@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,7 +43,7 @@ public class CourseController {
     @GetMapping("/{id}/chapters")
     public ResponseEntity<?> getChapterByIdCourse(@PathVariable Long id) {
         return JsonResponse.ok(chapterService.getChapterByIdCourse(id));
-}
+    }
 
     @PostMapping
     public ResponseEntity<?> addCourse(@RequestParam(value = "file") MultipartFile multipartFile,
