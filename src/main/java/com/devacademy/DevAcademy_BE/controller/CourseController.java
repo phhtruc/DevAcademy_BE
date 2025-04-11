@@ -41,8 +41,10 @@ public class CourseController {
     }
 
     @GetMapping("/{id}/chapters")
-    public ResponseEntity<?> getChapterByIdCourse(@PathVariable Long id) {
-        return JsonResponse.ok(chapterService.getChapterByIdCourse(id));
+    public ResponseEntity<?> getChapterByIdCourse(@RequestParam(required = false, defaultValue = "1") int page,
+                                                  @RequestParam(required = false, defaultValue = "10") int pageSize,
+                                                  @PathVariable Long id) {
+        return JsonResponse.ok(chapterService.getChapterByIdCourse(page, pageSize, id));
     }
 
     @PostMapping
