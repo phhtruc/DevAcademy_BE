@@ -31,7 +31,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**")
                         .permitAll()
                         .requestMatchers("/api/v1/admin/**").hasAnyAuthority(RoleType.ADMIN.name())
-                        .requestMatchers("/api/v1/users/**").hasAnyAuthority(RoleType.ADMIN.name())
+                        //.requestMatchers("/api/v1/users/**").hasAnyAuthority(RoleType.ADMIN.name())
                         .anyRequest().permitAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

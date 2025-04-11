@@ -41,21 +41,10 @@ public class CourseController {
         return JsonResponse.ok(courseService.getCourseById(id));
     }
 
-    @GetMapping("/list-id")
-    public ResponseEntity<?> getCourseByListId(@RequestParam List<Long> id) {
-        return JsonResponse.ok(courseService.getCourseByListId(id));
-    }
-
     @GetMapping("/{id}/chapters")
     public ResponseEntity<?> getChapterByIdCourse(@PathVariable Long id) {
         return JsonResponse.ok(chapterService.getChapterByIdCourse(id));
-    }
-
-//
-//    @GetMapping("/{id}/teacher")
-//    public ResponseEntity<?> getTeacherByIdCourse(@PathVariable Long id) {
-//        return JsonResponse.ok(teacherService.getTeacherByIdCourse(id));
-//    }
+}
 
     @PostMapping
     public ResponseEntity<?> addCourse(@RequestParam(value = "file", required = false) MultipartFile multipartFile,

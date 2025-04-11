@@ -1,6 +1,7 @@
 package com.devacademy.DevAcademy_BE.controller;
 
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
+import com.devacademy.DevAcademy_BE.service.CourseService;
 import com.devacademy.DevAcademy_BE.service.UserService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -17,7 +19,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/api/v1/users")
 public class UserController {
-
+    CourseService courseService;
     UserService userService;
 
     @GetMapping
@@ -34,6 +36,13 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> addUser(@RequestBody @Valid UserRequestDTO request) {
         return JsonResponse.ok(userService.addUser(request));
+    }
+
+    @GetMapping("/{id}/courses")
+    public ResponseEntity<?> getCoursesByIdUser(@RequestParam(required = false, defaultValue = "1") int page,
+                                                @RequestParam(required = false, defaultValue = "100") int pageSize,
+                                                @PathVariable UUID id) {
+        return JsonResponse.ok(courseService.getCoursesByIdUser(page, pageSize, id));
     }
 
 //

@@ -1,10 +1,10 @@
 package com.devacademy.DevAcademy_BE.dto.courseDTO;
 
 import com.devacademy.DevAcademy_BE.dto.techStackDTO.TechStackResponseDTO;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import com.devacademy.DevAcademy_BE.enums.RegisterType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
@@ -21,5 +21,7 @@ public class CourseResponseDTO {
     String thumbnailUrl;
     String description;
     Boolean isPublic;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    RegisterType registerType;
     List<TechStackResponseDTO> techStacks;
 }

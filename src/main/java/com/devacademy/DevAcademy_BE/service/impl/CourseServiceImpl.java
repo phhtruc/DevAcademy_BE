@@ -7,9 +7,11 @@ import com.devacademy.DevAcademy_BE.entity.CourseEntity;
 import com.devacademy.DevAcademy_BE.entity.CourseHasTechStackEntity;
 import com.devacademy.DevAcademy_BE.entity.TechStackEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
+import com.devacademy.DevAcademy_BE.enums.RegisterType;
 import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.mapper.CourseMapper;
 import com.devacademy.DevAcademy_BE.repository.CourseHasTechStackRepository;
+import com.devacademy.DevAcademy_BE.repository.CourseRegisterRepository;
 import com.devacademy.DevAcademy_BE.repository.CourseRepository;
 import com.devacademy.DevAcademy_BE.repository.TechStackRepository;
 import com.devacademy.DevAcademy_BE.service.CloudinaryService;
@@ -26,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +41,7 @@ public class CourseServiceImpl implements CourseService {
     TechStackRepository techStackRepository;
     CourseHasTechStackRepository courseHasTechStackRepository;
     CloudinaryService cloudinaryService;
+    CourseRegisterRepository courseRegisterRepository;
 
     @Override
     public PageResponse<?> getAllCourse(int page, int size) {
@@ -112,20 +116,27 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseResponseDTO> getCourseByListId(List<Long> id) {
-        return List.of();
+    public PageResponse<?> getCoursesByIdUser(int page, int pageSize, UUID id) {
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
+        Page<CourseEntity> course = courseRepository.findAllByUserId(pageable, id);
+
+        List<CourseResponseDTO> list = course.stream()
+                .map(courseEntity -> {
+                    var listTechStack = getTechStacksByCourse(courseEntity);
+                    var courseMap = courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
+                    courseMap.setRegisterType(getRegisterTypes(id, courseEntity));
+                    return courseMap;
+                })
+                .collect(Collectors.toList());
+
+        return PageResponse.builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalPage(course.getTotalPages())
+                .items(list)
+                .build();
     }
 
-//    @Override
-//    public List<CourseResponseDTO> getCourseByListId(List<Long> id) {
-//        var courses = courseRepository.findAllById(id);
-//        if (courses.isEmpty()) {
-//            throw new ApiException(ErrorCode.COURSE_NOT_EXISTED);
-//        }
-//        return courses.stream().map(courseMapper::toCourseResponseDTO)
-//                .collect(Collectors.toList());
-//    }
-//
     @Override
     public PageResponse<?> getAllCourseForUser(int page, int pageSize) {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
@@ -161,6 +172,13 @@ public class CourseServiceImpl implements CourseService {
         return courseHasTechStackRepository.findByCourseEntityId(course.getId()).stream()
                 .map(CourseHasTechStackEntity::getTechStackEntity)
                 .toList();
+    }
+
+    private RegisterType getRegisterTypes(UUID id, CourseEntity course) {
+        var courseRegister = courseRegisterRepository
+                .findCourseRegisterEntitiesByCourseEntityIdAndUserEntityId(course.getId(), id)
+                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_NOT_EXISTED));
+        return courseRegister.getRegisterType();
     }
 
 //
