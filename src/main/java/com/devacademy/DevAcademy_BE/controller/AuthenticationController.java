@@ -1,9 +1,7 @@
 package com.devacademy.DevAcademy_BE.controller;
 
 import com.devacademy.DevAcademy_BE.auth.AuthenticationRequest;
-import com.devacademy.DevAcademy_BE.auth.AuthenticationResponse;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
-import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.service.AuthenticationService;
 import com.devacademy.DevAcademy_BE.service.UserService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;

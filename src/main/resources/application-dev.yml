@@ -30,3 +30,8 @@ jwt:
   expriration : 28800000
   refresh-token :
     expriration : 604800000 # 7days
+
+cloudinary:
+  cloud_name: dn2m3s9k0
+  api_key: 378291597432836
+  api_secret: 9AuvGB1tA5cF0juYBQ5jqbo3Xwg
