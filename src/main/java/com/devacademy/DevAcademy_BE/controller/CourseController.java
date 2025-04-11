@@ -47,15 +47,15 @@ public class CourseController {
 }
 
     @PostMapping
-    public ResponseEntity<?> addCourse(@RequestParam(value = "file", required = false) MultipartFile multipartFile,
+    public ResponseEntity<?> addCourse(@RequestParam(value = "file") MultipartFile multipartFile,
                                        @ModelAttribute @Valid CourseRequestDTO request) throws IOException {
         return JsonResponse.ok(courseService.addCourse(request, multipartFile));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCourse(@PathVariable Long id,
-                                          @RequestParam(value = "file", required = false) MultipartFile file,
-                                          @ModelAttribute @Valid CourseRequestDTO request) {
+                                          @RequestParam(value = "file") MultipartFile file,
+                                          @ModelAttribute @Valid CourseRequestDTO request) throws IOException {
         return JsonResponse.ok(courseService.updateCourse(id, request, file));
     }
 

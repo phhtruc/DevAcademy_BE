@@ -61,51 +61,27 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     @Override
     public CourseResponseDTO addCourse(CourseRequestDTO request, MultipartFile file) throws IOException {
-        var course = courseMapper.toCourseEntity(request);
-        course.setIsDeleted(false);
-        course.setThumbnailUrl(cloudinaryService.uploadImage(file));
+        CourseEntity course = prepareCourseEntity(request, file, null);
         courseRepository.save(course);
-
-        var techStacks = getTechStackEntities(request);
-        var courseHasTech = techStacks.stream()
-                .map(tech -> {
-                    var courseHasTechStack = CourseHasTechStackEntity.builder()
-                            .courseEntity(course)
-                            .techStackEntity(tech)
-                            .build();
-                    return courseHasTechStackRepository.save(courseHasTechStack);
-                })
-                .collect(Collectors.toSet());
-
-        return courseMapper.toCourseResponseDTO(course, techStacks);
-
+        saveCourseTechStacks(course, request);
+        return courseMapper.toCourseResponseDTO(course, getTechStackEntities(request));
     }
 
+    @Transactional
     @Override
-    public CourseResponseDTO updateCourse(Long id, CourseRequestDTO request, MultipartFile file) {
-        return null;
-    }
+    public CourseResponseDTO updateCourse(Long id, CourseRequestDTO request, MultipartFile file) throws IOException {
+        courseRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_NOT_EXISTED));
 
-//    @Override
-//    public CourseResponseDTO updateCourse(Long id, CourseRequestDTO request, MultipartFile file) {
-//        var existingCourse = courseRepository.findById(id)
-//                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_NOT_EXISTED));
-//        existingCourse.getTechStackEntities()
-//                .forEach(tech -> tech.getCourses().remove(existingCourse));
-//        existingCourse.getTechStackEntities().clear();
-//        courseRepository.flush();
-//        var courseMap = courseMapper.toCourseEntity(request);
-//        courseMap.setId(id);
-//        courseMap.setTechStackEntities(getTechStackEntities(request, courseMap));
-//        courseMap.setIsDeleted(false);
-//        courseMap.setTeachers(getTeacherEntities(request));
-//        if(file != null){
-//            courseMap.setThumbnailUrl(imageService.upload(file));
-//        }else {
-//            courseMap.setThumbnailUrl(existingCourse.getThumbnailUrl());
-//        }
-//        return courseMapper.toCourseResponseDTO(courseRepository.save(courseMap));
-//    }
+        var techStacksHasCourse = courseHasTechStackRepository.findByCourseEntityId(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_TECH_STACK_NOT_FOUNT));
+        courseHasTechStackRepository.deleteAll(techStacksHasCourse);
+
+        CourseEntity updatedCourse = prepareCourseEntity(request, file, id);
+        courseRepository.save(updatedCourse);
+        saveCourseTechStacks(updatedCourse, request);
+        return courseMapper.toCourseResponseDTO(updatedCourse, getTechStackEntities(request));
+    }
 
     @Override
     public void deleteCourse(Long id) {
@@ -145,6 +121,27 @@ public class CourseServiceImpl implements CourseService {
         return getPageResponse(page, pageSize, course);
     }
 
+    private CourseEntity prepareCourseEntity(CourseRequestDTO request, MultipartFile file, Long id) throws IOException {
+        CourseEntity course = courseMapper.toCourseEntity(request);
+        course.setId(id);
+        course.setIsDeleted(false);
+        if (file != null && !file.isEmpty()) {
+            course.setThumbnailUrl(cloudinaryService.uploadImage(file));
+        }
+        return course;
+    }
+
+    private void saveCourseTechStacks(CourseEntity course, CourseRequestDTO request) {
+        List<TechStackEntity> techStacks = getTechStackEntities(request);
+        techStacks.forEach(tech -> {
+            CourseHasTechStackEntity relation = CourseHasTechStackEntity.builder()
+                    .courseEntity(course)
+                    .techStackEntity(tech)
+                    .build();
+            courseHasTechStackRepository.save(relation);
+        });
+    }
+
     private PageResponse<?> getPageResponse(int page, int pageSize, Page<CourseEntity> course) {
         List<CourseResponseDTO> list = course.stream()
                 .map(courseEntity -> {
@@ -169,7 +166,9 @@ public class CourseServiceImpl implements CourseService {
     }
 
     private List<TechStackEntity> getTechStacksByCourse(CourseEntity course) {
-        return courseHasTechStackRepository.findByCourseEntityId(course.getId()).stream()
+        return courseHasTechStackRepository.findByCourseEntityId(course.getId())
+                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_TECH_STACK_NOT_FOUNT))
+                .stream()
                 .map(CourseHasTechStackEntity::getTechStackEntity)
                 .toList();
     }
@@ -180,12 +179,4 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new ApiException(ErrorCode.COURSE_NOT_EXISTED));
         return courseRegister.getRegisterType();
     }
-
-//
-//    private List<TeacherEntity> getTeacherEntities(CourseRequestDTO requestDTO) {
-//        return requestDTO.getTeacher().stream()
-//                .map(id -> teacherRepository.findById(id).orElseThrow(() ->
-//                        new ApiException(ErrorCode.TEACHER_NOT_EXISTED)))
-//                .collect(Collectors.toList());
-//    }
 }

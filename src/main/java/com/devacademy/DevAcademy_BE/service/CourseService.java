@@ -18,7 +18,7 @@ public interface CourseService {
 
     CourseResponseDTO addCourse(CourseRequestDTO request, MultipartFile file) throws IOException;
 
-    CourseResponseDTO updateCourse(Long id, CourseRequestDTO request, MultipartFile file);
+    CourseResponseDTO updateCourse(Long id, CourseRequestDTO request, MultipartFile file) throws IOException;
 
     void deleteCourse(Long id);
 

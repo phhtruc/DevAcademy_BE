@@ -55,6 +55,8 @@ public enum ErrorCode {
     CHAPTER_IS_PUBLIC_INVALID_TYPE(180007, "Chapter public status must be false or true", HttpStatus.BAD_REQUEST),
     CHAPTER_NOT_FOUND(180008, "Chapter not found", HttpStatus.NOT_FOUND),
 
+    // course has tech stack 1900**
+    COURSE_TECH_STACK_NOT_FOUNT(190000, "Course has tech stack not found", HttpStatus.NOT_FOUND),
 
     ;
     Integer code;
