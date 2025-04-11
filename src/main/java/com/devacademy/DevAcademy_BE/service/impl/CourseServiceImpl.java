@@ -48,7 +48,7 @@ public class CourseServiceImpl implements CourseService {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, size);
         Page<CourseEntity> course = courseRepository.findAll(pageable);
 
-        return getPageResponse(page, size, course);
+        return getPageResponse(page, size, course, null);
     }
 
     @Override
@@ -96,21 +96,7 @@ public class CourseServiceImpl implements CourseService {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
         Page<CourseEntity> course = courseRepository.findAllByUserId(pageable, id);
 
-        List<CourseResponseDTO> list = course.stream()
-                .map(courseEntity -> {
-                    var listTechStack = getTechStacksByCourse(courseEntity);
-                    var courseMap = courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
-                    courseMap.setRegisterType(getRegisterTypes(id, courseEntity));
-                    return courseMap;
-                })
-                .collect(Collectors.toList());
-
-        return PageResponse.builder()
-                .page(page)
-                .pageSize(pageSize)
-                .totalPage(course.getTotalPages())
-                .items(list)
-                .build();
+        return getPageResponse(page, pageSize, course, id);
     }
 
     @Override
@@ -118,7 +104,7 @@ public class CourseServiceImpl implements CourseService {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
         Page<CourseEntity> course = courseRepository.findAllPublicCourses(pageable);
 
-        return getPageResponse(page, pageSize, course);
+        return getPageResponse(page, pageSize, course, null);
     }
 
     private CourseEntity prepareCourseEntity(CourseRequestDTO request, MultipartFile file, Long id) throws IOException {
@@ -142,11 +128,16 @@ public class CourseServiceImpl implements CourseService {
         });
     }
 
-    private PageResponse<?> getPageResponse(int page, int pageSize, Page<CourseEntity> course) {
+    private PageResponse<?> getPageResponse(int page, int pageSize, Page<CourseEntity> course, UUID id) {
         List<CourseResponseDTO> list = course.stream()
                 .map(courseEntity -> {
                     var listTechStack = getTechStacksByCourse(courseEntity);
-                    return courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
+                    var courseMap = courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
+                    if(id != null){
+                        courseMap.setRegisterType(getRegisterTypes(id, courseEntity));
+                        return courseMap;
+                    }else
+                        return courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
                 })
                 .collect(Collectors.toList());
 

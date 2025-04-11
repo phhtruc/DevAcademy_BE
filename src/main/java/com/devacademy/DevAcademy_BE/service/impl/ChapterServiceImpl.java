@@ -41,7 +41,7 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     public ChapterResponseDTO addChapter(ChapterRequestDTO request) {
         courseRepository.findById(Long.parseLong(request.getCourseId()))
-                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_NOT_EXISTED));
+                .orElseThrow(() -> new ApiException(ErrorCode.CHAPTER_NOT_EXISTED));
         var chapterEntity = chapterMapper.toChapterEntity(request);
         var chapter_order = chapterRepository.findMaxOrderByCourseId(Long.parseLong(request.getCourseId()));
         chapterEntity.setChapterOrder(chapter_order != null? chapter_order + 1 : 1);
@@ -60,9 +60,9 @@ public class ChapterServiceImpl implements ChapterService {
         chapterEntity.setIsDeleted(false);
         return chapterMapper.toChapterResponseDTO(chapterRepository.save(chapterEntity));
     }
-//
-//    @Override
-//    public void updateListChapter(ChapterRequestDTO request) {
+
+    @Override
+    public void updateListChapter(ChapterRequestDTO request) {
 //        List<ChapterEntity> chapters = getChapterEntities(request);
 //        courseRepository.findById(Long.parseLong(request.getCourseId()))
 //                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_NOT_EXISTED));
@@ -73,7 +73,7 @@ public class ChapterServiceImpl implements ChapterService {
 //            updatedChapter.setIsDeleted(false);
 //            chapterRepository.save(updatedChapter);
 //        }
-//    }
+    }
 
     @Override
     public void deleteChapter(Long id) {
@@ -84,7 +84,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    public PageResponse<?> getAllChapters(int page, int pageSize, Long id) {
+    public PageResponse<?> getChapterByIdCourse(int page, int pageSize, Long id) {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize,
                 Sort.by("chapterOrder"));
         Page<ChapterEntity> chapter = chapterRepository.findAllByCourseEntityId(id, pageable);
@@ -110,14 +110,6 @@ public class ChapterServiceImpl implements ChapterService {
 //                .collect(Collectors.toList());
 //        chapterRepository.saveAll(lessonsToUpdate);
 //    }
-
-    @Override
-    public List<ChapterResponseDTO> getChapterByIdCourse(Long id) {
-        var chapters = chapterRepository.findAllByCourseEntityId(id)
-                .orElseThrow(() -> new ApiException(ErrorCode.CHAPTER_NOT_EXISTED));
-        return chapters.stream().map(chapterMapper::toChapterResponseDTO)
-                .collect(Collectors.toList());
-    }
 
 //    private List<ChapterEntity> getChapterEntities(ChapterRequestDTO requestDTO) {
 //        return requestDTO.getChapterId().stream()
