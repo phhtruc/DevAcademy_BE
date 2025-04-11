@@ -45,6 +45,17 @@ public enum ErrorCode {
     COURSE_TECH_STACK_INVALID(170013, "Course is tech stack must be not null", HttpStatus.NOT_FOUND),
     TECH_STACK_NOT_EXISTED(170014, "Tech stack not exists", HttpStatus.NOT_FOUND),
 
+    // Error code for chapter: 1800**
+    CHAPTER_NOT_EXISTED(180001, "Chapter not existed", HttpStatus.NOT_FOUND),
+    CHAPTER_NAME_INVALID(180002, "Chapter name must be not blank", HttpStatus.BAD_REQUEST),
+    CHAPTER_ORDER_INVALID(180003, "Chapter chapter_order must be a valid number", HttpStatus.BAD_REQUEST),
+    CHAPTER_IS_PUBLIC_INVALID(180004, "Chapter public status must be not blank", HttpStatus.BAD_REQUEST),
+    CHAPTER_IS_DELETED_INVALID(180005, "Chapter deletion status must be false or true", HttpStatus.BAD_REQUEST),
+    CHAPTER_COURSE_ID_INVALID(180006, "Chapter must be associated with a valid course", HttpStatus.BAD_REQUEST),
+    CHAPTER_IS_PUBLIC_INVALID_TYPE(180007, "Chapter public status must be false or true", HttpStatus.BAD_REQUEST),
+    CHAPTER_NOT_FOUND(180008, "Chapter not found", HttpStatus.NOT_FOUND),
+
+
     ;
     Integer code;
     String message;

@@ -1,6 +1,7 @@
 package com.devacademy.DevAcademy_BE.controller;
 
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseRequestDTO;
+import com.devacademy.DevAcademy_BE.service.ChapterService;
 import com.devacademy.DevAcademy_BE.service.CourseService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
 import jakarta.validation.Valid;
@@ -21,7 +22,7 @@ import java.util.List;
 public class CourseController {
 
     CourseService courseService;
-    //ChapterService chapterService;
+    ChapterService chapterService;
 
     @GetMapping
     public ResponseEntity<?> getAllCourse(@RequestParam(required = false, defaultValue = "1") int page,
@@ -45,10 +46,11 @@ public class CourseController {
         return JsonResponse.ok(courseService.getCourseByListId(id));
     }
 
-//    @GetMapping("/{id}/chapters")
-//    public ResponseEntity<?> getChapterByIdCourse(@PathVariable Long id) {
-//        return JsonResponse.ok(chapterService.getChapterByIdCourse(id));
-//    }
+    @GetMapping("/{id}/chapters")
+    public ResponseEntity<?> getChapterByIdCourse(@PathVariable Long id) {
+        return JsonResponse.ok(chapterService.getChapterByIdCourse(id));
+    }
+
 //
 //    @GetMapping("/{id}/teacher")
 //    public ResponseEntity<?> getTeacherByIdCourse(@PathVariable Long id) {

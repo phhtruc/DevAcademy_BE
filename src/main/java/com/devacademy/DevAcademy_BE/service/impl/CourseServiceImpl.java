@@ -49,15 +49,10 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseResponseDTO getCourseById(Long id) {
-        return null;
+        var course = courseRepository.findById(id).orElseThrow(() ->
+                new ApiException(ErrorCode.COURSE_NOT_EXISTED));
+        return courseMapper.toCourseResponseDTO(course, getTechStacksByCourse(course));
     }
-
-//    @Override
-//    public CourseResponseDTO getCourseById(Long id) {
-//        var course = courseRepository.findById(id).orElseThrow(() ->
-//                new ApiException(ErrorCode.COURSE_NOT_EXISTED));
-//        return courseMapper.toCourseResponseDTO(course);
-//    }
 
     @Transactional
     @Override
