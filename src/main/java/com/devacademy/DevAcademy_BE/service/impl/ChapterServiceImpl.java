@@ -1,5 +1,6 @@
 package com.devacademy.DevAcademy_BE.service.impl;
 
+import com.devacademy.DevAcademy_BE.dto.OrderDTO;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterResponseDTO;
@@ -62,20 +63,6 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    public void updateListChapter(ChapterRequestDTO request) {
-//        List<ChapterEntity> chapters = getChapterEntities(request);
-//        courseRepository.findById(Long.parseLong(request.getCourseId()))
-//                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_NOT_EXISTED));
-//        for (ChapterEntity chapter: chapters) {
-//            ChapterEntity updatedChapter = chapterMapper.toChapterEntity(request);
-//            updatedChapter.setId(chapter.getId());
-//            updatedChapter.setName(chapter.getName());
-//            updatedChapter.setIsDeleted(false);
-//            chapterRepository.save(updatedChapter);
-//        }
-    }
-
-    @Override
     public void deleteChapter(Long id) {
         ChapterEntity chapterEntity = chapterRepository.findById(id)
                 .orElseThrow(() -> new ApiException(ErrorCode.CHAPTER_NOT_EXISTED));
@@ -98,22 +85,16 @@ public class ChapterServiceImpl implements ChapterService {
                 .build();
     }
 
-//    @Override
-//    public void updateOrder(List<OrderDTO> orderDTOS) {
-//        List<ChapterEntity> lessonsToUpdate = orderDTOS.stream()
-//                .map(dto -> chapterRepository.findById(Long.parseLong(dto.getId()))
-//                        .map(lesson -> {
-//                            lesson.setChapterOrder(Integer.parseInt(dto.getOrder()));
-//                            return lesson;
-//                        })
-//                        .orElseThrow(() -> new ApiException(ErrorCode.LESSON_NOT_EXISTED)))
-//                .collect(Collectors.toList());
-//        chapterRepository.saveAll(lessonsToUpdate);
-//    }
-
-//    private List<ChapterEntity> getChapterEntities(ChapterRequestDTO requestDTO) {
-//        return requestDTO.getChapterId().stream()
-//                .map((id) -> chapterRepository.findById(id).orElseThrow(()->new ApiException(ErrorCode.CHAPTER_NOT_EXISTED))).toList();
-//
-//    }
+    @Override
+    public void updateOrder(List<OrderDTO> orderDTOS) {
+        List<ChapterEntity> lessonsToUpdate = orderDTOS.stream()
+                .map(dto -> chapterRepository.findById(Long.parseLong(dto.getId()))
+                        .map(lesson -> {
+                            lesson.setChapterOrder(Integer.parseInt(dto.getOrder()));
+                            return lesson;
+                        })
+                        .orElseThrow(() -> new ApiException(ErrorCode.LESSON_NOT_EXISTED)))
+                .collect(Collectors.toList());
+        chapterRepository.saveAll(lessonsToUpdate);
+    }
 }

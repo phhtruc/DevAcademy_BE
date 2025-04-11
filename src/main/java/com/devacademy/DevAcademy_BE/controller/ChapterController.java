@@ -1,5 +1,6 @@
 package com.devacademy.DevAcademy_BE.controller;
 
+import com.devacademy.DevAcademy_BE.dto.OrderDTO;
 import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterRequestDTO;
 import com.devacademy.DevAcademy_BE.service.ChapterService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
@@ -48,21 +49,15 @@ public class ChapterController {
         return JsonResponse.ok(chapterService.updateChapter(id, request));
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateListChapter(@RequestBody ChapterRequestDTO request) {
-        chapterService.updateListChapter(request);
-        return ResponseEntity.ok().build();
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteChapter(@PathVariable Long id) {
         chapterService.deleteChapter(id);
         return JsonResponse.deleted();
     }
 
-//    @PatchMapping("/update-order")
-//    public ResponseEntity<?> updateLessonOrder(@RequestBody List<OrderDTO> orderDTOS) {
-//        chapterService.updateOrder(orderDTOS);
-//        return ResponseEntity.ok().build();
-//    }
+    @PatchMapping("/update-order")
+    public ResponseEntity<?> updateLessonOrder(@RequestBody List<OrderDTO> orderDTOS) {
+        chapterService.updateOrder(orderDTOS);
+        return ResponseEntity.ok().build();
+    }
 }
