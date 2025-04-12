@@ -1,5 +1,7 @@
 package com.devacademy.DevAcademy_BE.dto.userDTO;
 
+import com.devacademy.DevAcademy_BE.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,5 +18,7 @@ import java.util.UUID;
 public class UserResponseDTO implements Serializable {
     UUID id;
     String fullName;
-    String email;
+    String avatar;
+    UserStatus status;
+    String roles;
 }

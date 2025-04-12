@@ -1,6 +1,7 @@
 package com.devacademy.DevAcademy_BE.controller;
 
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
+import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
 import com.devacademy.DevAcademy_BE.service.CourseService;
 import com.devacademy.DevAcademy_BE.service.UserService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
@@ -10,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -23,7 +26,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<?> getAllUser(@RequestParam(required = false, defaultValue = "1") int page,
-                                     @RequestParam(required = false, defaultValue = "10") int pageSize) {
+                                        @RequestParam(required = false, defaultValue = "10") int pageSize) {
         return JsonResponse.ok(userService.getAllUser(page, pageSize));
     }
 
@@ -44,12 +47,12 @@ public class UserController {
         return JsonResponse.ok(courseService.getCoursesByIdUser(page, pageSize, id));
     }
 
-//
-//    @PutMapping("/{id}")
-//    public ResponseEntity<?> updateUser(@PathVariable UUID id, @RequestParam(value = "avatar", required = false) MultipartFile multipartFile,
-//                                        @ModelAttribute @Valid UserRequestDTO request) {
-//        return JsonResponse.ok(userService.updateUserDTO(id, request));
-//    }
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable UUID id,
+                                        @RequestParam(value = "avatar", required = false) MultipartFile multipartFile,
+                                        @ModelAttribute @Valid UserUpdateRequestDTO request) throws IOException {
+        return JsonResponse.ok(userService.updateUserDTO(id, request, multipartFile));
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable UUID id) {
