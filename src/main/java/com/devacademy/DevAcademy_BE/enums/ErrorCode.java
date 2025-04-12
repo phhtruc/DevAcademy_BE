@@ -29,6 +29,7 @@ public enum ErrorCode {
     FULL_NAME_INVALID(1003, "Full name must be not null", HttpStatus.BAD_REQUEST),
     USER_NOT_FOUND(1004, "User not found", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTS(1004, "Email exists", HttpStatus.BAD_REQUEST),
+    ROLE_INVALID_TYPE(1005, "Email exists", HttpStatus.BAD_REQUEST),
 
     //Role 2***
     ROLE_NAME_NOT_FOUND(2000, "Role name not found", HttpStatus.BAD_REQUEST),
