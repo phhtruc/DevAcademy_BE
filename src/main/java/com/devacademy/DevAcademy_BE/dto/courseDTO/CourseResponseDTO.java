@@ -1,5 +1,6 @@
 package com.devacademy.DevAcademy_BE.dto.courseDTO;
 
+import com.devacademy.DevAcademy_BE.dto.CategoryDTO.CategoryResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.techStackDTO.TechStackResponseDTO;
 import com.devacademy.DevAcademy_BE.enums.RegisterType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,4 +25,5 @@ public class CourseResponseDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     RegisterType registerType;
     List<TechStackResponseDTO> techStacks;
+    CategoryResponseDTO category;
 }

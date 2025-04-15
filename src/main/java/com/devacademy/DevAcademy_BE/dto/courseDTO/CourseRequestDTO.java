@@ -25,6 +25,9 @@ public class CourseRequestDTO {
     @NotBlank(message = "COURSE_IS_PUBLIC_INVALID")
     @Pattern(regexp = "true|false", message = "COURSE_IS_PUBLIC_INVALID_TYPE")
     String isPublic;
+    String idCategory;
+    @NotBlank(message = "DURATION_INVALID")
+    String duration;
     @NotNull(message = "COURSE_TECH_STACK_INVALID")
     List<String> techStack;
 }
