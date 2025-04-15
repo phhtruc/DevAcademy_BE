@@ -2,9 +2,11 @@ package com.devacademy.DevAcademy_BE.service;
 
 import com.devacademy.DevAcademy_BE.dto.OrderDTO;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
+import com.devacademy.DevAcademy_BE.dto.VideoStatusResponse;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonResponseDTO;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -14,9 +16,9 @@ public interface LessonService {
 
     LessonResponseDTO getLessonById(Long id);
 
-    LessonResponseDTO addLesson(LessonRequestDTO request);
+    LessonResponseDTO addLesson(LessonRequestDTO request, MultipartFile video);
 
-    LessonResponseDTO updateLesson(Long id, LessonRequestDTO request);
+    LessonResponseDTO updateLesson(Long id, LessonRequestDTO request, MultipartFile video);
 
     void deleteLesson(Long id);
 
@@ -26,5 +28,5 @@ public interface LessonService {
 
     List<LessonResponseDTO> getAllAssignment();
 
-    PageResponse<?> getAllLesson(int page, int pageSize);
+    VideoStatusResponse getVideoUploadStatus(Long id);
 }
