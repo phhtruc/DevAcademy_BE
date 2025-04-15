@@ -2,6 +2,8 @@ package com.devacademy.DevAcademy_BE.service.impl;
 
 import com.devacademy.DevAcademy_BE.dto.OrderDTO;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
+import com.devacademy.DevAcademy_BE.dto.VideoStatusResponse;
+import com.devacademy.DevAcademy_BE.dto.VideoUploadTask;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonResponseDTO;
 import com.devacademy.DevAcademy_BE.entity.LessonEntity;
@@ -12,6 +14,7 @@ import com.devacademy.DevAcademy_BE.mapper.LessonMapper;
 import com.devacademy.DevAcademy_BE.repository.ChapterRepository;
 import com.devacademy.DevAcademy_BE.repository.LessonRepository;
 import com.devacademy.DevAcademy_BE.service.LessonService;
+import com.devacademy.DevAcademy_BE.service.VideoUploadQueueService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +23,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +39,9 @@ public class LessonServiceImpl implements LessonService {
     LessonRepository lessonRepository;
     LessonMapper lessonMapper;
     ChapterRepository chapterRepository;
+    VideoUploadQueueService videoUploadQueueService;
+    RedisTemplate<String, VideoStatusResponse> redisTemplate;
+    static String REDIS_VIDEO_STATUS_KEY = "video:status:";
 
     @Override
     public PageResponse<?> getLessonsByIdChapter(int page, int pageSize, Long idChapter) {
@@ -58,26 +66,41 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public LessonResponseDTO addLesson(LessonRequestDTO request) {
+    public LessonResponseDTO addLesson(LessonRequestDTO request, MultipartFile video) {
         chapterRepository.findById(Long.parseLong(request.getChapterId()))
                 .orElseThrow(() -> new ApiException(ErrorCode.CHAPTER_NOT_FOUND));
         var lesson = lessonMapper.toLessonEntity(request);
         var lesson_order = lessonRepository.findMaxOrderByChapterId(Long.parseLong(request.getChapterId()));
-        lesson.setLessonOrder(lesson_order != null? lesson_order + 1 : 1);
+        lesson.setLessonOrder(lesson_order != null ? lesson_order + 1 : 1);
         lesson.setIsDeleted(false);
-        return lessonMapper.toLessonResponseDTO(lessonRepository.save(lesson));
+
+        var savedLesson = lessonRepository.save(lesson);
+
+        // Đưa video vào hàng đợi upload
+        if (video != null && !video.isEmpty()) {
+            videoUploadQueueService.addToQueue(new VideoUploadTask(video, savedLesson.getId()));
+        }
+
+        return lessonMapper.toLessonResponseDTO(savedLesson);
     }
 
     @Override
-    public LessonResponseDTO updateLesson(Long id, LessonRequestDTO request) {
+    public LessonResponseDTO updateLesson(Long id, LessonRequestDTO request, MultipartFile video) {
         lessonRepository.findById(id).orElseThrow(() ->
                 new ApiException(ErrorCode.LESSON_NOT_EXISTED));
         chapterRepository.findById(Long.parseLong(request.getChapterId()))
                 .orElseThrow(() -> new ApiException(ErrorCode.CHAPTER_NOT_FOUND));
+
         var lesson = lessonMapper.toLessonEntity(request);
         lesson.setId(id);
         lesson.setIsDeleted(false);
-        return lessonMapper.toLessonResponseDTO(lessonRepository.save(lesson));
+
+        var savedLesson = lessonRepository.save(lesson);
+
+        if (video != null && !video.isEmpty()) {
+            videoUploadQueueService.addToQueue(new VideoUploadTask(video, savedLesson.getId()));
+        }
+        return lessonMapper.toLessonResponseDTO(savedLesson);
     }
 
     @Override
@@ -115,16 +138,8 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public PageResponse<?> getAllLesson(int page, int pageSize) {
-        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
-        Page<LessonEntity> course = lessonRepository.findAllByOrderByLessonOrderAsc(pageable);
-        List<LessonResponseDTO> list = course.map(lessonMapper::toLessonResponseDTO)
-                .stream().collect(Collectors.toList());
-        return PageResponse.builder()
-                .page(page)
-                .pageSize(pageSize)
-                .totalPage(course.getTotalPages())
-                .items(list)
-                .build();
+    public VideoStatusResponse getVideoUploadStatus(Long lessonId) {
+        return redisTemplate.opsForValue().get(REDIS_VIDEO_STATUS_KEY + lessonId);
     }
+
 }

@@ -21,7 +21,7 @@ public class LessonRequestDTO {
     String type;
     @NotBlank(message = "LESSON_CONTENT_INVALID")
     String content;
-    @NotNull(message = "LESSON_VIDEO_URL_INVALID")
+    //@NotNull(message = "LESSON_VIDEO_URL_INVALID")
     String videoUrl;
     @NotNull(message = "COURSE_CONTENT_REFER_INVALID")
     String contentRefer;

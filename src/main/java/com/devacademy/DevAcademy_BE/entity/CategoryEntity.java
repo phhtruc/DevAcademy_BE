@@ -5,8 +5,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Where;
 
-import java.math.BigDecimal;
-
 @Entity
 @Getter
 @Setter
@@ -15,31 +13,16 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Where(clause = "xoa = false")
-@Table(name = "KHOAHOC")
-public class CourseEntity extends BaseEntity {
+@Table(name = "DANHMUC")
+public class CategoryEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "tenKhoaHoc")
+    @Column(name = "tenDanhMuc")
     String name;
-
-    @Column(name = "gia")
-    BigDecimal price;
-
-    @Column(name = "anhMoTa")
-    String thumbnailUrl;
-
-    @Column(name = "moTa", columnDefinition = "NTEXT")
-    String description;
-
-    @Column(name = "congKhai")
-    Boolean isPublic;
 
     @Column(name = "xoa")
     Boolean isDeleted;
-
-    @Column(name = "thoiHan")
-    Integer duration;
 }
