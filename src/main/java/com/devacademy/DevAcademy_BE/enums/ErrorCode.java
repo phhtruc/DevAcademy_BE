@@ -45,6 +45,7 @@ public enum ErrorCode {
     COURSE_IS_PUBLIC_INVALID_TYPE(170012, "The course is public must be false or true", HttpStatus.NOT_FOUND),
     COURSE_TECH_STACK_INVALID(170013, "Course is tech stack must be not null", HttpStatus.NOT_FOUND),
     TECH_STACK_NOT_EXISTED(170014, "Tech stack not exists", HttpStatus.NOT_FOUND),
+    DURATION_INVALID(170015, "Duration must be not blank", HttpStatus.NOT_FOUND),
 
     // Error code for chapter: 1800**
     CHAPTER_NOT_EXISTED(180001, "Chapter not existed", HttpStatus.NOT_FOUND),
@@ -56,9 +57,6 @@ public enum ErrorCode {
     CHAPTER_IS_PUBLIC_INVALID_TYPE(180007, "Chapter public status must be false or true", HttpStatus.BAD_REQUEST),
     CHAPTER_NOT_FOUND(180008, "Chapter not found", HttpStatus.NOT_FOUND),
 
-    // course has tech stack 2000**
-    COURSE_TECH_STACK_NOT_FOUNT(200000, "Course has tech stack not found", HttpStatus.NOT_FOUND),
-
     // error code lesson: 1900**
     LESSON_NOT_EXISTED(190001, "Lesson not existed", HttpStatus.NOT_FOUND),
     LESSON_TITLE_INVALID(190002, "Lesson title must be not blank", HttpStatus.NOT_FOUND),
@@ -69,6 +67,15 @@ public enum ErrorCode {
     COURSE_CONTENT_REFER_INVALID(190007, "Lesson content refer unit must be not blank", HttpStatus.NOT_FOUND),
     COURSE_TYPE_INVALID_TYPE(190008, "The Lesson type must be READINGS, LECTURES or EXERCISES", HttpStatus.NOT_FOUND),
     CHAPTER_ID_INVALID(190009, "Chapter id must be not blank", HttpStatus.NOT_FOUND),
+
+    // course has tech stack 2000**
+    COURSE_TECH_STACK_NOT_FOUNT(200000, "Course has tech stack not found", HttpStatus.NOT_FOUND),
+
+    // category 2100**
+    CATEGORY_NOT_FOUNT(210000, "Category not found", HttpStatus.NOT_FOUND),
+
+    // category has course 2200**
+    CATEGORY_HAS_COURSE_NOT_FOUNT(210000, "Category has course not found", HttpStatus.NOT_FOUND),
 
     ;
     Integer code;
