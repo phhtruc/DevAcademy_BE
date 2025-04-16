@@ -1,4 +1,4 @@
-package com.devacademy.DevAcademy_BE.dto.CategoryDTO;
+package com.devacademy.DevAcademy_BE.dto.categoryDTO;
 
 import lombok.AccessLevel;
 import lombok.Builder;

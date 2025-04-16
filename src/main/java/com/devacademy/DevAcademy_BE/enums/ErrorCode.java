@@ -76,7 +76,7 @@ public enum ErrorCode {
 
     // category has course 2200**
     CATEGORY_HAS_COURSE_NOT_FOUNT(210000, "Category has course not found", HttpStatus.NOT_FOUND),
-
+    CATEGORY_NAME_INVALID(21001, "Category name must be not blank", HttpStatus.NOT_FOUND),
     ;
     Integer code;
     String message;
