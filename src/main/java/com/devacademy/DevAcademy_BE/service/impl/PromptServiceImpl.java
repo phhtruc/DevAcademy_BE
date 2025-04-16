@@ -71,7 +71,9 @@ public class PromptServiceImpl implements PromptService {
 
     @Override
     public PromptResponseDTO getById(Long id) {
-        return null;
+        PromptEntity promptEntity = promptRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.PROMPT_NOT_FOUNT));
+        return promptMapper.toPromptConfigResponseDTO(promptEntity);
     }
 
     @Override
@@ -81,11 +83,9 @@ public class PromptServiceImpl implements PromptService {
 
     @Override
     public void delete(Long id) {
-
+        PromptEntity promptEntity = promptRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.PROMPT_NOT_FOUNT));
+        promptEntity.setIsDeleted(true);
     }
 
-    @Override
-    public List<PromptResponseDTO> getAllPromptByIdCourse(Long id) {
-        return null;
-    }
 }

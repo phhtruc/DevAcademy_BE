@@ -5,8 +5,6 @@ import com.devacademy.DevAcademy_BE.dto.promptDTO.PromptRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.promptDTO.PromptResponseDTO;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public interface PromptService {
 
@@ -23,6 +21,4 @@ public interface PromptService {
     PromptResponseDTO updateConfigActive(Long id);
 
     void delete(Long id);
-
-    List<PromptResponseDTO> getAllPromptByIdCourse(Long id);
 }
