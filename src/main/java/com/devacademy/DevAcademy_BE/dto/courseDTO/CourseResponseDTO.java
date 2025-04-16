@@ -1,9 +1,8 @@
 package com.devacademy.DevAcademy_BE.dto.courseDTO;
 
-import com.devacademy.DevAcademy_BE.dto.CategoryDTO.CategoryResponseDTO;
+import com.devacademy.DevAcademy_BE.dto.categoryDTO.CategoryResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.techStackDTO.TechStackResponseDTO;
 import com.devacademy.DevAcademy_BE.enums.RegisterType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
