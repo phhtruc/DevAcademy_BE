@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
     @Query("select r from PromptEntity r where r.isActive=true")
@@ -16,4 +19,9 @@ public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
     PromptEntity findByIdActive(Long id);
 
     Page<PromptEntity> findAllPromptByCourseEntityId(Long id, Pageable pageable);
+
+    Optional<PromptEntity> findByIdAndCourseEntityId(Long id, Long idCourse);
+
+    List<PromptEntity> findAllPromptByCourseEntityId(Long id);
+
 }

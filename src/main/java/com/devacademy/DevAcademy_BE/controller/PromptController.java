@@ -25,11 +25,6 @@ public class PromptController {
         return JsonResponse.ok(promptService.getAllReviewConfig(page, pageSize, courseId));
     }
 
-    @GetMapping("/active")
-    public ResponseEntity<?> getByActive() {
-        return JsonResponse.ok(promptService.getByActive());
-    }
-
     @PostMapping
     public ResponseEntity<?> addConfig(@RequestBody @Valid PromptRequestDTO config) {
         return JsonResponse.ok(promptService.saveConfig(config));
@@ -47,8 +42,9 @@ public class PromptController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> updateConfigActive(@PathVariable Long id) {
-        return JsonResponse.ok(promptService.updateConfigActive(id));
+    public ResponseEntity<?> updateConfigActive(@PathVariable Long id,
+                                                @RequestParam Long idCourse) {
+        return JsonResponse.ok(promptService.updateConfigActive(id, idCourse));
     }
 
     @DeleteMapping("/{id}")

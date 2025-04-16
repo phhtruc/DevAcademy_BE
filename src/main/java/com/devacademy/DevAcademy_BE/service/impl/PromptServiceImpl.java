@@ -31,11 +31,6 @@ public class PromptServiceImpl implements PromptService {
     PromptMapper promptMapper;
 
     @Override
-    public PromptResponseDTO getByActive() {
-        return null;
-    }
-
-    @Override
     public PromptResponseDTO saveConfig(PromptRequestDTO config) {
         PromptEntity promptEntity = promptMapper.toPromptEntity(config);
         promptEntity.setIsDeleted(false);
@@ -45,7 +40,13 @@ public class PromptServiceImpl implements PromptService {
 
     @Override
     public PromptResponseDTO updateConfig(Long id, PromptRequestDTO config) {
-        return null;
+        promptRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.PROMPT_NOT_FOUNT));
+        var promptMapperEntity = promptMapper.toPromptEntity(config);
+        promptMapperEntity.setIsDeleted(false);
+        promptMapperEntity.setId(id);
+        promptMapperEntity.setIsActive(false);
+        return promptMapper.toPromptConfigResponseDTO(promptRepository.save(promptMapperEntity));
     }
 
     @Override
@@ -77,8 +78,17 @@ public class PromptServiceImpl implements PromptService {
     }
 
     @Override
-    public PromptResponseDTO updateConfigActive(Long id) {
-        return null;
+    public PromptResponseDTO updateConfigActive(Long id, Long idCourse) {
+        promptRepository.findAllPromptByCourseEntityId(idCourse)
+                .forEach(promptEntity -> {
+                    promptEntity.setIsActive(false);
+                    promptRepository.save(promptEntity);
+                });
+        PromptEntity promptEntity = promptRepository.findByIdAndCourseEntityId(id, idCourse)
+                .orElseThrow(() -> new ApiException(ErrorCode.PROMPT_NOT_FOUNT));
+        promptEntity.setIsActive(true);
+
+        return promptMapper.toPromptConfigResponseDTO(promptRepository.save(promptEntity));
     }
 
     @Override

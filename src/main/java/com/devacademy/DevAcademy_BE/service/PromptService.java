@@ -8,8 +8,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface PromptService {
 
-    PromptResponseDTO getByActive();
-
     PromptResponseDTO saveConfig(PromptRequestDTO config);
 
     PromptResponseDTO updateConfig(Long id, PromptRequestDTO config);
@@ -18,7 +16,7 @@ public interface PromptService {
 
     PromptResponseDTO getById(Long id);
 
-    PromptResponseDTO updateConfigActive(Long id);
+    PromptResponseDTO updateConfigActive(Long id, Long idCourse);
 
     void delete(Long id);
 }
