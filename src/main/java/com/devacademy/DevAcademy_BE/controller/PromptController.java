@@ -20,8 +20,9 @@ public class PromptController {
 
     @GetMapping
     public ResponseEntity<?> getAllConfig(@RequestParam(required = false, defaultValue = "1") int page,
-                                          @RequestParam(required = false, defaultValue = "10") int pageSize) {
-        return JsonResponse.ok(promptService.getAllReviewConfig(page, pageSize));
+                                          @RequestParam(required = false, defaultValue = "10") int pageSize,
+                                          @RequestParam(required = false) Long courseId) {
+        return JsonResponse.ok(promptService.getAllReviewConfig(page, pageSize, courseId));
     }
 
     @GetMapping("/active")
