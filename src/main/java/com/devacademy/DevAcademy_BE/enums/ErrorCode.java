@@ -70,6 +70,7 @@ public enum ErrorCode {
 
     // course has tech stack 2000**
     COURSE_TECH_STACK_NOT_FOUNT(200000, "Course has tech stack not found", HttpStatus.NOT_FOUND),
+    TECH_STACK_NAME_INVALID(200001, "Tech stack name must be not blank", HttpStatus.NOT_FOUND),
 
     // category 2100**
     CATEGORY_NOT_FOUNT(210000, "Category not found", HttpStatus.NOT_FOUND),
