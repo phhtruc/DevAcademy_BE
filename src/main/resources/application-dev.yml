@@ -27,6 +27,14 @@ spring:
     redis:
       host: localhost
       port: 6379
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id:
+#            client-secret:
+#            redirect-uri:
 
 jwt:
   secret-key : 89dd3a965fddb1460b64c074c928ee19f6697a168bc5ec72c336fb6df64289c4

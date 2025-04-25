@@ -25,4 +25,5 @@ public class CourseResponseDTO {
     RegisterType registerType;
     List<TechStackResponseDTO> techStacks;
     CategoryResponseDTO category;
+    String duration;
 }
