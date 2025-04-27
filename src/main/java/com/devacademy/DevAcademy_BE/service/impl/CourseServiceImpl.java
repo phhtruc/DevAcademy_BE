@@ -81,9 +81,7 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new ApiException(ErrorCode.COURSE_TECH_STACK_NOT_FOUNT));
         courseHasTechStackRepository.deleteAll(techStacksHasCourse);
 
-        var courseHasCate = courseHasCategoryRepository.findByCourseEntityId(id)
-                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_TECH_STACK_NOT_FOUNT));
-        courseHasCategoryRepository.delete(courseHasCate);
+        courseHasCategoryRepository.findByCourseEntityId(id).ifPresent(courseHasCategoryRepository::delete);
 
         CourseEntity updatedCourse = prepareCourseEntity(request, file, id);
         courseRepository.save(updatedCourse);
