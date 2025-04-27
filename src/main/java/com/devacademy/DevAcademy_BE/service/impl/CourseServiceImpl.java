@@ -66,7 +66,9 @@ public class CourseServiceImpl implements CourseService {
         CourseEntity course = prepareCourseEntity(request, file, null);
         courseRepository.save(course);
         saveCourseTechStacks(course, request);
-        return courseMapper.toCourseResponseDTO(course, getTechStackEntities(request));
+        var courseMap =  courseMapper.toCourseResponseDTO(course, getTechStackEntities(request));
+        courseMap.setCategory(getCategory(course));
+        return courseMap;
     }
 
     @Transactional
@@ -79,14 +81,14 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new ApiException(ErrorCode.COURSE_TECH_STACK_NOT_FOUNT));
         courseHasTechStackRepository.deleteAll(techStacksHasCourse);
 
-        var courseHasCate = courseHasCategoryRepository.findByCourseEntityId(id)
-                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_TECH_STACK_NOT_FOUNT));
-        courseHasCategoryRepository.delete(courseHasCate);
+        courseHasCategoryRepository.findByCourseEntityId(id).ifPresent(courseHasCategoryRepository::delete);
 
         CourseEntity updatedCourse = prepareCourseEntity(request, file, id);
         courseRepository.save(updatedCourse);
         saveCourseTechStacks(updatedCourse, request);
-        return courseMapper.toCourseResponseDTO(updatedCourse, getTechStackEntities(request));
+        var courseMap =  courseMapper.toCourseResponseDTO(updatedCourse, getTechStackEntities(request));
+        courseMap.setCategory(getCategory(updatedCourse));
+        return courseMap;
     }
 
     @Override
