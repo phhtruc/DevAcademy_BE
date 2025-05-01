@@ -12,4 +12,5 @@ public class VideoStatusResponse {
     private String status;
     private String videoUrl;
     private String errorMessage;
+    private Integer progress;
 }

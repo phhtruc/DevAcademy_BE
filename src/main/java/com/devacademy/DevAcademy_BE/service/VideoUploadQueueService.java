@@ -31,16 +31,18 @@ public class VideoUploadQueueService {
     CloudinaryService cloudinaryService;
     RedisTemplate<String, VideoStatusResponse> redisTemplate;
     ExecutorService executorService;
+    WebSocketService webSocketService;
 
     @Autowired
     public VideoUploadQueueService(
             LessonRepository lessonRepository,
             CloudinaryService cloudinaryService,
-            RedisTemplate<String, VideoStatusResponse> redisTemplate
+            RedisTemplate<String, VideoStatusResponse> redisTemplate, WebSocketService webSocketService
     ) {
         this.lessonRepository = lessonRepository;
         this.cloudinaryService = cloudinaryService;
         this.redisTemplate = redisTemplate;
+        this.webSocketService = webSocketService;
         this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
         for (int i = 0; i < THREAD_POOL_SIZE; i++) {
@@ -89,8 +91,8 @@ public class VideoUploadQueueService {
             log.info("Upload thành công cho lessonId: {}", lessonId);
 
         } catch (Exception e) {
-            log.error("Lỗi upload cho lessonId {}: {}", lessonId, e.getMessage());
-            updateVideoStatusInRedis(lessonId, VideoUploadStatus.FAILED, null, e.getMessage());
+            log.error("Error uploading video for lessonId {}: {}, task: {}",
+                    lessonId, e.getMessage(), task.getVideo().getOriginalFilename());
         }
     }
 
@@ -103,6 +105,8 @@ public class VideoUploadQueueService {
                 .build();
 
         redisTemplate.opsForValue().set(REDIS_VIDEO_STATUS_KEY + lessonId, response, Duration.ofMinutes(30));
+
+        webSocketService.broadcastProgress(response);
     }
 
     @PreDestroy

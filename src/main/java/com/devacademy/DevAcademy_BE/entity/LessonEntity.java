@@ -37,7 +37,7 @@ public class LessonEntity extends BaseEntity {
     @Column(name = "noiDungPhu", columnDefinition = "NTEXT")
     String contentRefer;
 
-    @Column(name = "video_url")
+    @Column(name = "video_url", columnDefinition = "NTEXT")
     String videoUrl;
 
     @Column(name = "xoa")

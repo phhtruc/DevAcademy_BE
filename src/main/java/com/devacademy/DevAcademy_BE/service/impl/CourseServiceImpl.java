@@ -122,7 +122,7 @@ public class CourseServiceImpl implements CourseService {
         if (file != null && !file.isEmpty()) {
             course.setThumbnailUrl(cloudinaryService.uploadImage(file));
         }
-        if(request.getIdCategory() != null) {
+        if(request.getIdCategory() != null && !request.getIdCategory().isBlank()) {
             CategoryEntity categoryEntity = categoryRepository.findById(Long.parseLong(request.getIdCategory()))
                     .orElseThrow(() -> new ApiException(ErrorCode.CATEGORY_NOT_FOUNT));
             saveCategoryHasCourse(course, categoryEntity);
