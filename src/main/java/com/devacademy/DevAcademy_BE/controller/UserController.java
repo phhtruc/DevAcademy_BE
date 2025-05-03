@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +31,7 @@ public class UserController {
         return JsonResponse.ok(userService.getAllUser(page, pageSize));
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable UUID id) {
         return JsonResponse.ok(userService.getUserById(id));
@@ -40,6 +42,7 @@ public class UserController {
         return JsonResponse.ok(userService.addUser(request));
     }
 
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/{id}/courses")
     public ResponseEntity<?> getCoursesByIdUser(@RequestParam(required = false, defaultValue = "1") int page,
                                                 @RequestParam(required = false, defaultValue = "100") int pageSize,
@@ -47,6 +50,7 @@ public class UserController {
         return JsonResponse.ok(courseService.getCoursesByIdUser(page, pageSize, id));
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable UUID id,
                                         @RequestParam(value = "avatar", required = false) MultipartFile multipartFile,

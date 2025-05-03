@@ -3,6 +3,7 @@ package com.devacademy.DevAcademy_BE.controller;
 import com.devacademy.DevAcademy_BE.dto.OrderDTO;
 import com.devacademy.DevAcademy_BE.dto.VideoStatusResponse;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonRequestDTO;
+import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonSearchDTO;
 import com.devacademy.DevAcademy_BE.service.LessonService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
 import jakarta.validation.Valid;
@@ -61,6 +62,13 @@ public class LessonController {
     @GetMapping("/{id}/video-status")
     public ResponseEntity<VideoStatusResponse> getVideoUploadStatus(@PathVariable Long id) {
         return ResponseEntity.ok(lessonService.getVideoUploadStatus(id));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchLessons(@Valid LessonSearchDTO searchDTO,
+                                           @RequestParam(required = false, defaultValue = "1") int page,
+                                           @RequestParam(required = false, defaultValue = "10") int pageSize) {
+        return JsonResponse.ok(lessonService.searchLessons(searchDTO, page, pageSize));
     }
 
 }

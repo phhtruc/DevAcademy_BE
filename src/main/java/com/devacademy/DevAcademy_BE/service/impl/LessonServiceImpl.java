@@ -6,6 +6,7 @@ import com.devacademy.DevAcademy_BE.dto.VideoStatusResponse;
 import com.devacademy.DevAcademy_BE.dto.VideoUploadTask;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonResponseDTO;
+import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonSearchDTO;
 import com.devacademy.DevAcademy_BE.entity.LessonEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
 import com.devacademy.DevAcademy_BE.enums.TypeLesson;
@@ -140,6 +141,11 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public VideoStatusResponse getVideoUploadStatus(Long lessonId) {
         return redisTemplate.opsForValue().get(REDIS_VIDEO_STATUS_KEY + lessonId);
+    }
+
+    @Override
+    public PageResponse<?> searchLessons(LessonSearchDTO searchDTO, int page, int pageSize) {
+        return null;
     }
 
 }

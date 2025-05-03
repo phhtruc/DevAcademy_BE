@@ -1,6 +1,7 @@
 package com.devacademy.DevAcademy_BE.controller;
 
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseRequestDTO;
+import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearcchDTO;
 import com.devacademy.DevAcademy_BE.service.ChapterService;
 import com.devacademy.DevAcademy_BE.service.CourseService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
@@ -9,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,12 +31,14 @@ public class CourseController {
         return JsonResponse.ok(courseService.getAllCourse(page, pageSize));
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'TEACHER')")
     @GetMapping("/user")
     public ResponseEntity<?> getAllCourseForUser(@RequestParam(required = false, defaultValue = "1") int page,
                                                  @RequestParam(required = false, defaultValue = "10") int pageSize) {
         return JsonResponse.ok(courseService.getAllCourseForUser(page, pageSize));
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'TEACHER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getCourseById(@PathVariable Long id) {
         return JsonResponse.ok(courseService.getCourseById(id));
@@ -64,5 +68,13 @@ public class CourseController {
     public ResponseEntity<?> deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);
         return JsonResponse.deleted();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchProperties(@Valid CourseSearcchDTO searchDTO,
+                                              @RequestParam(required = false, defaultValue = "1") int page,
+                                              @RequestParam(required = false, defaultValue = "10") int pageSize,
+                                              @RequestParam(required = false) String sortPrice) {
+        return JsonResponse.ok(courseService.searchCourse(searchDTO, page, pageSize, sortPrice));
     }
 }

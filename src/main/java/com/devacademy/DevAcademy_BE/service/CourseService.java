@@ -3,6 +3,7 @@ package com.devacademy.DevAcademy_BE.service;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseResponseDTO;
+import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearcchDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,4 +26,6 @@ public interface CourseService {
     PageResponse<?> getCoursesByIdUser(int page, int pageSize, UUID id);
 
     PageResponse<?> getAllCourseForUser(int page, int pageSize);
+
+    PageResponse<?> searchCourse(CourseSearcchDTO searchDTO, int page, int pageSize, String sortPrice);
 }

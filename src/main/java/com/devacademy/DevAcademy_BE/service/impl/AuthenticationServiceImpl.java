@@ -46,25 +46,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String JwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        tokenService.revokeAllUserTokens(user);
-        tokenService.saveToken(TokenEntity.builder()
-                .token(JwtToken)
-                .tokenType(TokenType.BEARER)
-                .userEntity(user)
-                .expired(false)
-                .revoked(false)
-                .isDeleted(false)
-                .build());
-
-        return AuthenticationResponse.builder()
-                .tokenType(TokenType.BEARER)
-                .id(user.getId())
-                .email(user.getEmail())
-                .roles(user.getAuthorities().toString())
-                .message("Login success")
-                .accessToken(JwtToken)
-                .refreshToken(refreshToken)
-                .build();
+        return buildAuthenticationResponse(user, JwtToken, refreshToken, "Login success");
     }
 
     @Override
@@ -79,15 +61,30 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (!jwtService.isTokenValid(refreshToken, user.get(), TokenType.REFRESH_TOKEN)) {
             throw new RuntimeException("token is invalid");
         }
-        tokenService.revokeAllUserTokens(user.get());
         String accessToken = jwtService.generateToken(user.get());
+
+        return buildAuthenticationResponse(user.get(), accessToken, refreshToken, "Refresh token success");
+    }
+
+    private AuthenticationResponse buildAuthenticationResponse(UserEntity user, String accessToken, String refreshToken,
+                                                               String message) {
+        tokenService.revokeAllUserTokens(user);
+
+        tokenService.saveToken(TokenEntity.builder()
+                .token(accessToken)
+                .tokenType(TokenType.BEARER)
+                .userEntity(user)
+                .expired(false)
+                .revoked(false)
+                .isDeleted(false)
+                .build());
 
         return AuthenticationResponse.builder()
                 .tokenType(TokenType.BEARER)
-                .id(user.get().getId())
-                .email(user.get().getEmail())
-                .roles(user.get().getAuthorities().toString())
-                .message("refreshToken success")
+                .id(user.getId())
+                .email(user.getEmail())
+                .roles(user.getAuthorities().toString())
+                .message(message)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

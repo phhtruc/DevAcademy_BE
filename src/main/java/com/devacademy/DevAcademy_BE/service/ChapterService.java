@@ -4,6 +4,7 @@ import com.devacademy.DevAcademy_BE.dto.OrderDTO;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterResponseDTO;
+import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterSearchDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,4 +23,7 @@ public interface ChapterService {
     void updateOrder(List<OrderDTO> orderDTOS);
 
     PageResponse<?> getChapterByIdCourse(int page, int pageSize, Long id);
+
+    PageResponse<?> searchChapters(ChapterSearchDTO searchDTO, int page, int pageSize);
+
 }

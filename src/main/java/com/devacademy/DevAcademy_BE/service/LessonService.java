@@ -5,6 +5,7 @@ import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.VideoStatusResponse;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonResponseDTO;
+import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonSearchDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,4 +30,6 @@ public interface LessonService {
     List<LessonResponseDTO> getAllAssignment();
 
     VideoStatusResponse getVideoUploadStatus(Long id);
+
+    PageResponse<?> searchLessons(LessonSearchDTO searchDTO, int page, int pageSize);
 }

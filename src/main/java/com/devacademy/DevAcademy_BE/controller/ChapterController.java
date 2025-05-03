@@ -2,6 +2,7 @@ package com.devacademy.DevAcademy_BE.controller;
 
 import com.devacademy.DevAcademy_BE.dto.OrderDTO;
 import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterRequestDTO;
+import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterSearchDTO;
 import com.devacademy.DevAcademy_BE.service.ChapterService;
 import com.devacademy.DevAcademy_BE.service.LessonService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
@@ -55,5 +56,12 @@ public class ChapterController {
     public ResponseEntity<?> updateLessonOrder(@RequestBody List<OrderDTO> orderDTOS) {
         chapterService.updateOrder(orderDTOS);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchChapters(@Valid ChapterSearchDTO searchDTO,
+                                            @RequestParam(required = false, defaultValue = "1") int page,
+                                            @RequestParam(required = false, defaultValue = "10") int pageSize) {
+        return JsonResponse.ok(chapterService.searchChapters(searchDTO, page, pageSize));
     }
 }

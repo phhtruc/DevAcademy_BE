@@ -43,27 +43,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        // Get The Token String
+
+        // Get the Token String
         final String jwtToken = authorizationHeader.substring(7);
 
-        final String userEmail = jwtService.extractUsername(jwtToken, TokenType.ACCESS_TOKEN);
+        try {
+            // Extract the user information from the token
+            final String userEmail = jwtService.extractUsername(jwtToken, TokenType.ACCESS_TOKEN);
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-            var isToken = tokenRepository.findByToken(jwtToken)
-                    .map(t -> !t.isRevoked() && !t.isExpired()).orElse(false);
+                // Check if the token is valid and not revoked
+                var isToken = tokenRepository.findByToken(jwtToken)
+                        .map(t -> !t.isRevoked() && !t.isExpired()).orElse(false);
 
-            if (jwtService.isTokenValid(jwtToken, userDetails, TokenType.ACCESS_TOKEN) && isToken) {
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (jwtService.isTokenValid(jwtToken, userDetails, TokenType.ACCESS_TOKEN) && isToken) {
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
+
+            filterChain.doFilter(request, response); // Continue with the filter chain
+
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // Token expired - respond with Unauthorized (401)
+            log.warn("JWT Token has expired: {}", e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Token has expired. Please login again.\"}");
+            response.getWriter().flush();
+
+        } catch (Exception e) {
+            // Any other authentication errors
+            log.error("Authentication failed: {}", e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Authentication failed. Token invalid.\"}");
+            response.getWriter().flush();
         }
-        filterChain.doFilter(request, response);
     }
 }

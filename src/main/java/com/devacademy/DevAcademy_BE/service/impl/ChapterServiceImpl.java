@@ -4,6 +4,7 @@ import com.devacademy.DevAcademy_BE.dto.OrderDTO;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterResponseDTO;
+import com.devacademy.DevAcademy_BE.dto.chapterDTO.ChapterSearchDTO;
 import com.devacademy.DevAcademy_BE.entity.ChapterEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
 import com.devacademy.DevAcademy_BE.exception.ApiException;
@@ -83,6 +84,11 @@ public class ChapterServiceImpl implements ChapterService {
                 .totalPage(chapter.getTotalPages())
                 .items(list)
                 .build();
+    }
+
+    @Override
+    public PageResponse<?> searchChapters(ChapterSearchDTO searchDTO, int page, int pageSize) {
+        return null;
     }
 
     @Override

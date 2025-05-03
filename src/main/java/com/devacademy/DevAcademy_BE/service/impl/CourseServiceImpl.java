@@ -4,6 +4,7 @@ import com.devacademy.DevAcademy_BE.dto.categoryDTO.CategoryResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseResponseDTO;
+import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearcchDTO;
 import com.devacademy.DevAcademy_BE.entity.*;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
 import com.devacademy.DevAcademy_BE.enums.RegisterType;
@@ -20,6 +21,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -113,6 +115,34 @@ public class CourseServiceImpl implements CourseService {
         Page<CourseEntity> course = courseRepository.findAllPublicCourses(pageable);
 
         return getPageResponse(page, pageSize, course, null);
+    }
+
+    @Override
+    public PageResponse<?> searchCourse(CourseSearcchDTO searchDTO, int page, int pageSize, String sortPrice) {
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
+
+        Specification<CourseEntity> spec = Specification
+                .where(CourseSpecification.hasTitle(searchDTO.getName()))
+                .and(CourseSpecification.hasCourseType(searchDTO.getType()))
+                .and(CourseSpecification.sortPrice(sortPrice));
+
+        Page<CourseEntity> courseEntityPage = courseRepository.findAll(spec, pageable);
+
+        List<CourseResponseDTO> courseList = courseEntityPage.stream()
+                .map(course -> {
+                    var techStacks = getTechStacksByCourse(course);
+                    var courseMap = courseMapper.toCourseResponseDTO(course, techStacks);
+                    courseMap.setCategory(getCategory(course));
+                    return courseMap;
+                })
+                .collect(Collectors.toList());
+
+        return PageResponse.builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalPage(courseEntityPage.getTotalPages())
+                .items(courseList)
+                .build();
     }
 
     private CourseEntity prepareCourseEntity(CourseRequestDTO request, MultipartFile file, Long id) throws IOException {
