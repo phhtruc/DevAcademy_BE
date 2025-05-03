@@ -59,7 +59,7 @@ public class ChapterController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchChapters(@Valid ChapterSearchDTO searchDTO,
+    public ResponseEntity<?> searchChapters(ChapterSearchDTO searchDTO,
                                             @RequestParam(required = false, defaultValue = "1") int page,
                                             @RequestParam(required = false, defaultValue = "10") int pageSize) {
         return JsonResponse.ok(chapterService.searchChapters(searchDTO, page, pageSize));

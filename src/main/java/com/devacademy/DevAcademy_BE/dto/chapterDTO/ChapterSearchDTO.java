@@ -6,6 +6,6 @@ import lombok.Setter;
 @Setter
 @Getter
 public class ChapterSearchDTO {
-    String chapterName;
-    String courseName;
+    String name;
+    String idCourse;
 }

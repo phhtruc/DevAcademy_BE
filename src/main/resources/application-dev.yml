@@ -39,7 +39,7 @@ spring:
 jwt:
   secret-key : 89dd3a965fddb1460b64c074c928ee19f6697a168bc5ec72c336fb6df64289c4
   refresh-key : CZBpcWmn8Y6LLxLEFyUBj5battfY7nh+neuTbofnsM4=
-  expriration : 180000  # 15 minutes
+  expriration : 900000  # 15 minutes
   refresh-token :
     expriration : 604800000 # 7days
 

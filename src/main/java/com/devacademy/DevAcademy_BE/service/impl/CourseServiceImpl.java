@@ -12,6 +12,7 @@ import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.mapper.CategoryMapper;
 import com.devacademy.DevAcademy_BE.mapper.CourseMapper;
 import com.devacademy.DevAcademy_BE.repository.*;
+import com.devacademy.DevAcademy_BE.repository.specification.CourseSpecification;
 import com.devacademy.DevAcademy_BE.service.CloudinaryService;
 import com.devacademy.DevAcademy_BE.service.CourseService;
 import jakarta.transaction.Transactional;

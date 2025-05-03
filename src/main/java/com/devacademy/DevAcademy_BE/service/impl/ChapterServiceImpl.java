@@ -11,6 +11,7 @@ import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.mapper.ChapterMapper;
 import com.devacademy.DevAcademy_BE.repository.ChapterRepository;
 import com.devacademy.DevAcademy_BE.repository.CourseRepository;
+import com.devacademy.DevAcademy_BE.repository.specification.ChapterSpecification;
 import com.devacademy.DevAcademy_BE.service.ChapterService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -88,7 +90,23 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public PageResponse<?> searchChapters(ChapterSearchDTO searchDTO, int page, int pageSize) {
-        return null;
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize,
+                Sort.by("chapterOrder"));
+
+        Specification<ChapterEntity> spec = Specification
+                .where(ChapterSpecification.hasTitleAndCourse(searchDTO));
+
+        Page<ChapterEntity> chapter = chapterRepository
+                .findAll(spec, pageable);
+
+        List<ChapterResponseDTO> list = chapter.map(chapterMapper::toChapterResponseDTO)
+                .stream().collect(Collectors.toList());
+        return PageResponse.builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalPage(chapter.getTotalPages())
+                .items(list)
+                .build();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.devacademy.DevAcademy_BE.repository;
+package com.devacademy.DevAcademy_BE.repository.specification;
 
 import com.devacademy.DevAcademy_BE.entity.CourseEntity;
 import org.springframework.data.jpa.domain.Specification;
