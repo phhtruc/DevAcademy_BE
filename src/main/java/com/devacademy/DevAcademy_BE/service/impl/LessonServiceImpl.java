@@ -14,6 +14,7 @@ import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.mapper.LessonMapper;
 import com.devacademy.DevAcademy_BE.repository.ChapterRepository;
 import com.devacademy.DevAcademy_BE.repository.LessonRepository;
+import com.devacademy.DevAcademy_BE.repository.specification.LessonSpecification;
 import com.devacademy.DevAcademy_BE.service.LessonService;
 import com.devacademy.DevAcademy_BE.service.VideoUploadQueueService;
 import jakarta.transaction.Transactional;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -145,7 +147,21 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public PageResponse<?> searchLessons(LessonSearchDTO searchDTO, int page, int pageSize) {
-        return null;
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize,
+                Sort.by("lessonOrder"));
+
+        Specification<LessonEntity> spec = Specification
+                .where(LessonSpecification.hasTitle(searchDTO))
+                ;
+        Page<LessonEntity> course = lessonRepository.findAll(spec, pageable);
+        List<LessonResponseDTO> list = course.map(lessonMapper::toLessonResponseDTO)
+                .stream().collect(Collectors.toList());
+        return PageResponse.builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalPage(course.getTotalPages())
+                .items(list)
+                .build();
     }
 
 }
