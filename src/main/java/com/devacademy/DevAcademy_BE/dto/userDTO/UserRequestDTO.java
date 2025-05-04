@@ -19,6 +19,6 @@ public class UserRequestDTO {
     String email;
     @NotBlank(message = "PASSWORD_INVALID")
     String password;
-    @Pattern(regexp = "TEACHER|USER", message = "ROLE_INVALID_TYPE")
+    @Pattern(regexp = "ADMIN|TEACHER|USER", message = "ROLE_INVALID_TYPE")
     String roles;
 }

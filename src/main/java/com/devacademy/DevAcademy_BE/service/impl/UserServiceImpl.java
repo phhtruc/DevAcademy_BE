@@ -83,22 +83,12 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         var savedUser = userRepository.save(user);
-        RoleEntity userRole;
-        if (request.getRoles() != null) {
-            userRole = roleRepository.findByName(RoleType.TEACHER)
-                    .orElseThrow(() -> new ApiException(ErrorCode.ROLE_NAME_NOT_FOUND));
-        } else {
-            userRole = roleRepository.findByName(RoleType.USER)
-                    .orElseThrow(() -> new ApiException(ErrorCode.ROLE_NAME_NOT_FOUND));
-        }
 
-        UserHasRoleEntity userHasRole = new UserHasRoleEntity();
-        userHasRole.setUserEntity(savedUser);
-        userHasRole.setRoleEntity(userRole);
-        userHasRoleRepository.save(userHasRole);
+        RoleEntity resolvedRole = resolveRole(request.getRoles());
+        associateRoleWithUser(savedUser, resolvedRole);
 
         var userMap = userMapper.toUserResponseDTO(savedUser);
-        userMap.setRoles(userRole.getName().toString());
+        userMap.setRoles(resolvedRole.getName().toString());
         return userMap;
     }
 
@@ -136,11 +126,34 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO updateUserDTO(UUID id, UserUpdateRequestDTO request, MultipartFile file) throws IOException {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
         user.setFullName(request.getFullName());
-        if(!file.isEmpty()) {
+        if (!file.isEmpty()) {
             user.setAvatar(cloudinaryService.uploadImage(file));
         }
 
         return userMapper.toUserResponseDTO(userRepository.save(user));
+    }
+
+    private RoleEntity resolveRole(String roleName) {
+        RoleType roleType;
+        if (roleName == null) {
+            roleType = RoleType.USER;
+        } else {
+            try {
+                roleType = RoleType.valueOf(roleName.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new ApiException(ErrorCode.ROLE_NAME_NOT_FOUND);
+            }
+        }
+        return roleRepository.findByName(roleType)
+                .orElseThrow(() -> new ApiException(ErrorCode.ROLE_NAME_NOT_FOUND));
+    }
+
+    private void associateRoleWithUser(UserEntity user, RoleEntity role) {
+        UserHasRoleEntity userHasRole = new UserHasRoleEntity();
+        userHasRole.setUserEntity(user);
+        userHasRole.setRoleEntity(role);
+
+        userHasRoleRepository.save(userHasRole);
     }
 
 }
