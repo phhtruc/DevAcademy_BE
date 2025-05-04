@@ -25,11 +25,10 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, VideoStatusResponse> redisTemplate(RedisConnectionFactory connectionFactory) {
+    public RedisTemplate<String, VideoStatusResponse> videoStatusRedisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, VideoStatusResponse> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // Serializer for value
         Jackson2JsonRedisSerializer<VideoStatusResponse> serializer =
                 new Jackson2JsonRedisSerializer<>(VideoStatusResponse.class);
 
@@ -40,5 +39,22 @@ public class RedisConfig {
 
         return template;
     }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        Jackson2JsonRedisSerializer<Object> serializer =
+                new Jackson2JsonRedisSerializer<>(Object.class);
+
+        template.setDefaultSerializer(serializer);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(serializer);
+        template.afterPropertiesSet();
+
+        return template;
+    }
+
 }
 

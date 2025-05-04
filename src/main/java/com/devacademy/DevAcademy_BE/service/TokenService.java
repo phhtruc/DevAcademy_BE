@@ -1,25 +1,55 @@
 package com.devacademy.DevAcademy_BE.service;
 
-import com.devacademy.DevAcademy_BE.entity.TokenEntity;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
-import com.devacademy.DevAcademy_BE.repository.TokenRepository;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-@Service
-public record TokenService(TokenRepository tokenRepository) {
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
-    public void saveToken(TokenEntity token) {
-        tokenRepository.save(token);
+@Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class TokenService {
+
+    RedisTemplate<String, Object> redisTemplate;
+
+    public void saveToken(UserEntity user, String accessToken, int duration) {
+        String key = buildKey(user.getId(), accessToken);
+
+        Map<String, Object> tokenData = new HashMap<>();
+        tokenData.put("revoked", false);
+        tokenData.put("expired", false);
+
+        redisTemplate.opsForHash().putAll(key, tokenData);
+        redisTemplate.expire(key, Duration.ofMinutes(duration));
     }
 
-    public void revokeAllUserTokens(UserEntity user){
-        var validUserToken = tokenRepository.findAllValidTokenByUser(user.getId());
-        if(validUserToken.isEmpty())
-            return;
-        validUserToken.forEach(t -> {
-            t.setRevoked(true);
-            t.setExpired(true);
-        });
-        tokenRepository.saveAll(validUserToken);
+    public void revokeAllUserTokens(UUID userId) {
+        Set<String> keys = redisTemplate.keys("token:" + userId + ":*");
+        if (!keys.isEmpty()) {
+            for (String key : keys) {
+                redisTemplate.opsForHash().put(key, "revoked", true);
+                redisTemplate.opsForHash().put(key, "expired", true);
+            }
+        }
+    }
+
+    public boolean isTokenValid(UUID userId, String token) {
+        String key = buildKey(userId, token);
+        Boolean revoked = (Boolean) redisTemplate.opsForHash().get(key, "revoked");
+        Boolean expired = (Boolean) redisTemplate.opsForHash().get(key, "expired");
+
+        return Boolean.FALSE.equals(revoked) && Boolean.FALSE.equals(expired);
+    }
+
+    private String buildKey(UUID userId, String token) {
+        return "token:" + userId + ":" + token;
     }
 }

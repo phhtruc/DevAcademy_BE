@@ -2,7 +2,6 @@ package com.devacademy.DevAcademy_BE.service.impl;
 
 import com.devacademy.DevAcademy_BE.auth.AuthenticationRequest;
 import com.devacademy.DevAcademy_BE.auth.AuthenticationResponse;
-import com.devacademy.DevAcademy_BE.entity.TokenEntity;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.enums.TokenType;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
@@ -31,7 +30,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     AuthenticationManager authenticationManager;
     UserRepository userRepository;
     JwtService jwtService;
-    TokenService tokenService;
+    TokenService redisTokenService;
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -43,10 +42,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Email or Password is incorrect"));
-        String JwtToken = jwtService.generateToken(user);
+
+        String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        return buildAuthenticationResponse(user, JwtToken, refreshToken, "Login success");
+        return buildAuthenticationResponse(user, accessToken, refreshToken, "Login success");
     }
 
     @Override
@@ -68,16 +68,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private AuthenticationResponse buildAuthenticationResponse(UserEntity user, String accessToken, String refreshToken,
                                                                String message) {
-        tokenService.revokeAllUserTokens(user);
-
-        tokenService.saveToken(TokenEntity.builder()
-                .token(accessToken)
-                .tokenType(TokenType.BEARER)
-                .userEntity(user)
-                .expired(false)
-                .revoked(false)
-                .isDeleted(false)
-                .build());
+        redisTokenService.revokeAllUserTokens(user.getId());
+        redisTokenService.saveToken(user, accessToken, 20);
+        redisTokenService.saveToken(user, refreshToken, 11111);
 
         return AuthenticationResponse.builder()
                 .tokenType(TokenType.BEARER)
