@@ -16,6 +16,7 @@ import com.devacademy.DevAcademy_BE.repository.RoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserHasRoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
 import com.devacademy.DevAcademy_BE.service.CloudinaryService;
+import com.devacademy.DevAcademy_BE.service.TokenService;
 import com.devacademy.DevAcademy_BE.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -44,6 +45,7 @@ public class UserServiceImpl implements UserService {
     UserHasRoleRepository userHasRoleRepository;
     PasswordEncoder passwordEncoder;
     CloudinaryService cloudinaryService;
+    TokenService tokenService;
 
     @Override
     public UserResponseDTO getUserById(UUID id) {
@@ -52,6 +54,20 @@ public class UserServiceImpl implements UserService {
         var user = userMapper.toUserResponseDTO(userEntity);
         user.setRoles(userEntity.getAuthorities().toString());
         return user;
+    }
+
+    @Override
+    public UserResponseDTO setActive(UUID id) {
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
+        if (userEntity.getStatus() == UserStatus.ACTIVE) {
+            userEntity.setStatus(UserStatus.INACTIVE);
+        } else {
+            userEntity.setStatus(UserStatus.ACTIVE);
+        }
+        userRepository.save(userEntity);
+        tokenService.revokeAllUserTokens(userEntity.getId());
+        return userMapper.toUserResponseDTO(userEntity);
     }
 
     @Transactional

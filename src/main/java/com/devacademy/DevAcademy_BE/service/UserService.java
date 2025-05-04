@@ -12,9 +12,16 @@ import java.util.UUID;
 
 @Service
 public interface UserService {
+
     UserResponseDTO addUser(UserRequestDTO request);
+
     PageResponse<?> getAllUser(int page, int pageSize);
+
     void deleteUserById(UUID id);
+
     UserResponseDTO updateUserDTO(UUID id, UserUpdateRequestDTO request, MultipartFile file) throws IOException;
+
     UserResponseDTO getUserById(UUID id);
+
+    UserResponseDTO setActive(UUID id);
 }

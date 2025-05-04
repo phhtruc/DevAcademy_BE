@@ -64,4 +64,9 @@ public class UserController {
         return JsonResponse.deleted();
     }
 
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<?> setActive(@PathVariable UUID id) {
+        return JsonResponse.ok(userService.setActive(id));
+    }
+
 }

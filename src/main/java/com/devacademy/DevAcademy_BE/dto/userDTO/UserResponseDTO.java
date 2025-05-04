@@ -21,4 +21,5 @@ public class UserResponseDTO implements Serializable {
     String avatar;
     UserStatus status;
     String roles;
+    String email;
 }
