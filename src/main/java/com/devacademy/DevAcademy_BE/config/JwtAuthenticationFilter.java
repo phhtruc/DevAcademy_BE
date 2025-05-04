@@ -1,8 +1,9 @@
 package com.devacademy.DevAcademy_BE.config;
 
+import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.enums.TokenType;
-import com.devacademy.DevAcademy_BE.repository.TokenRepository;
 import com.devacademy.DevAcademy_BE.service.JwtService;
+import com.devacademy.DevAcademy_BE.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     JwtService jwtService;
     UserDetailsService userDetailsService;
-    TokenRepository tokenRepository;
+    TokenService redisTokenService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -44,21 +46,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Get the Token String
         final String jwtToken = authorizationHeader.substring(7);
 
         try {
-            // Extract the user information from the token
             final String userEmail = jwtService.extractUsername(jwtToken, TokenType.ACCESS_TOKEN);
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+                UUID userId = ((UserEntity) userDetails).getId();
 
-                // Check if the token is valid and not revoked
-                var isToken = tokenRepository.findByToken(jwtToken)
-                        .map(t -> !t.isRevoked() && !t.isExpired()).orElse(false);
+                boolean isValidInRedis = redisTokenService.isTokenValid(userId, jwtToken);
 
-                if (jwtService.isTokenValid(jwtToken, userDetails, TokenType.ACCESS_TOKEN) && isToken) {
+                if (jwtService.isTokenValid(jwtToken, userDetails, TokenType.ACCESS_TOKEN) && isValidInRedis) {
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
