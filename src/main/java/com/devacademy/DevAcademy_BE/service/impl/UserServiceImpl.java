@@ -5,7 +5,6 @@ import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
-import com.devacademy.DevAcademy_BE.entity.CourseEntity;
 import com.devacademy.DevAcademy_BE.entity.RoleEntity;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.entity.UserHasRoleEntity;
@@ -17,7 +16,6 @@ import com.devacademy.DevAcademy_BE.mapper.UserMapper;
 import com.devacademy.DevAcademy_BE.repository.RoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserHasRoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
-import com.devacademy.DevAcademy_BE.repository.specification.CourseSpecification;
 import com.devacademy.DevAcademy_BE.repository.specification.UserSpecification;
 import com.devacademy.DevAcademy_BE.service.CloudinaryService;
 import com.devacademy.DevAcademy_BE.service.TokenService;
@@ -150,13 +148,34 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserResponseDTO updateUserDTO(UUID id, UserUpdateRequestDTO request, MultipartFile file) throws IOException {
-        UserEntity user = userRepository.findById(id).orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
-        user.setFullName(request.getFullName());
-        if (!file.isEmpty()) {
-            user.setAvatar(cloudinaryService.uploadImage(file));
+        UserEntity existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
+
+        if (request.getEmail() != null && !existingUser.getEmail().equals(request.getEmail())
+                && userRepository.existsByEmail(request.getEmail())) {
+            throw new ApiException(ErrorCode.EMAIL_EXISTS);
         }
 
-        return userMapper.toUserResponseDTO(userRepository.save(user));
+        if (request.getFullName() != null) {
+            existingUser.setFullName(request.getFullName());
+        }
+        if (request.getEmail() != null) {
+            existingUser.setEmail(request.getEmail());
+        }
+        if (request.getStatus() != null) {
+            existingUser.setStatus(UserStatus.valueOf(request.getStatus().toUpperCase()));
+        }
+        if (request.getRoles() != null) {
+            RoleEntity resolvedRole = resolveRole(request.getRoles());
+            userHasRoleRepository.deleteAllByUserEntity_Id(id);
+            associateRoleWithUser(existingUser, resolvedRole);
+        }
+
+        if (file != null && !file.isEmpty()) {
+            existingUser.setAvatar(cloudinaryService.uploadImage(file));
+        }
+
+        return userMapper.toUserResponseDTO(userRepository.save(existingUser));
     }
 
     private RoleEntity resolveRole(String roleName) {

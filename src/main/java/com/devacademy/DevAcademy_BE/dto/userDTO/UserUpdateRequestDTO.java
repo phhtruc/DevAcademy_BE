@@ -12,4 +12,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserUpdateRequestDTO {
     String fullName;
+
+    String email;
+
+    String roles;
+
+    String status;
 }

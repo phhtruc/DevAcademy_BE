@@ -1,6 +1,5 @@
 package com.devacademy.DevAcademy_BE.controller;
 
-import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearcchDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
@@ -54,7 +53,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable UUID id,
                                         @RequestParam(value = "avatar", required = false) MultipartFile multipartFile,
                                         @ModelAttribute @Valid UserUpdateRequestDTO request) throws IOException {
