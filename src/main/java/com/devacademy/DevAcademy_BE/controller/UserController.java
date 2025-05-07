@@ -1,6 +1,8 @@
 package com.devacademy.DevAcademy_BE.controller;
 
+import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearcchDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
+import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
 import com.devacademy.DevAcademy_BE.service.CourseService;
 import com.devacademy.DevAcademy_BE.service.UserService;
@@ -70,4 +72,10 @@ public class UserController {
         return JsonResponse.ok(userService.setActive(id));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchUser(UserSearchDTO searchDTO,
+                                        @RequestParam(required = false, defaultValue = "1") int page,
+                                        @RequestParam(required = false, defaultValue = "10") int pageSize) {
+        return JsonResponse.ok(userService.searchUser(searchDTO, page, pageSize));
+    }
 }

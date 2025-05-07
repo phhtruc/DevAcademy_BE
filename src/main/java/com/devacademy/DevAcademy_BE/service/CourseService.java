@@ -4,6 +4,8 @@ import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearcchDTO;
+import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

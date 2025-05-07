@@ -3,7 +3,9 @@ package com.devacademy.DevAcademy_BE.service.impl;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserResponseDTO;
+import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
+import com.devacademy.DevAcademy_BE.entity.CourseEntity;
 import com.devacademy.DevAcademy_BE.entity.RoleEntity;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.entity.UserHasRoleEntity;
@@ -15,6 +17,8 @@ import com.devacademy.DevAcademy_BE.mapper.UserMapper;
 import com.devacademy.DevAcademy_BE.repository.RoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserHasRoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
+import com.devacademy.DevAcademy_BE.repository.specification.CourseSpecification;
+import com.devacademy.DevAcademy_BE.repository.specification.UserSpecification;
 import com.devacademy.DevAcademy_BE.service.CloudinaryService;
 import com.devacademy.DevAcademy_BE.service.TokenService;
 import com.devacademy.DevAcademy_BE.service.UserService;
@@ -25,6 +29,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -70,6 +75,36 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponseDTO(userEntity);
     }
 
+    @Override
+    public PageResponse<?> searchUser(UserSearchDTO searchDTO, int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
+
+        Specification<UserEntity> spec = Specification
+                .where(UserSpecification.hasNameOrEmail(searchDTO.getName()))
+                .and(UserSpecification.hasStatus(searchDTO.getStatus()));
+
+        Page<UserEntity> users = userRepository.findAll(spec, pageable);
+
+        return getPageResponse(page, pageSize, users);
+    }
+
+    private PageResponse<?> getPageResponse(int page, int pageSize, Page<UserEntity> users) {
+        List<UserResponseDTO> list = users.stream()
+                .map(userMap -> {
+                    var user = userMapper.toUserResponseDTO(userMap);
+                    user.setRoles(userMap.getAuthorities().toString());
+                    return user;
+                })
+                .collect(Collectors.toList());
+
+        return PageResponse.builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalPage(users.getTotalPages())
+                .items(list)
+                .build();
+    }
+
     @Transactional
     @Override
     public UserResponseDTO addUser(UserRequestDTO request, MultipartFile file) throws IOException {
@@ -101,20 +136,7 @@ public class UserServiceImpl implements UserService {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
         Page<UserEntity> users = userRepository.findAll(pageable);
 
-        List<UserResponseDTO> list = users.stream()
-                .map(userMap -> {
-                    var user = userMapper.toUserResponseDTO(userMap);
-                    user.setRoles(userMap.getAuthorities().toString());
-                    return user;
-                })
-                .collect(Collectors.toList());
-
-        return PageResponse.builder()
-                .page(page)
-                .pageSize(pageSize)
-                .totalPage(users.getTotalPages())
-                .items(list)
-                .build();
+        return getPageResponse(page, pageSize, users);
     }
 
     @Override

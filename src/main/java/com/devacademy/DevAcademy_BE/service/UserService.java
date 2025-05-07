@@ -3,7 +3,9 @@ package com.devacademy.DevAcademy_BE.service;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserResponseDTO;
+import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,4 +26,6 @@ public interface UserService {
     UserResponseDTO getUserById(UUID id);
 
     UserResponseDTO setActive(UUID id);
+
+    PageResponse<?> searchUser(@Valid UserSearchDTO searchDTO, int page, int pageSize);
 }
