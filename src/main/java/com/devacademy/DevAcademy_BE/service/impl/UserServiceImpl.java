@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserResponseDTO addUser(UserRequestDTO request) {
+    public UserResponseDTO addUser(UserRequestDTO request, MultipartFile file) throws IOException {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ApiException(ErrorCode.EMAIL_EXISTS);
         }
@@ -81,6 +81,10 @@ public class UserServiceImpl implements UserService {
         user.setIsDeleted(false);
         user.setStatus(UserStatus.ACTIVE);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        if (file != null && !file.isEmpty()) {
+            user.setAvatar(cloudinaryService.uploadImage(file));
+        }
 
         var savedUser = userRepository.save(user);
 

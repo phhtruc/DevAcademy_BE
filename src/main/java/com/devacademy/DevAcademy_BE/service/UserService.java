@@ -13,7 +13,7 @@ import java.util.UUID;
 @Service
 public interface UserService {
 
-    UserResponseDTO addUser(UserRequestDTO request);
+    UserResponseDTO addUser(UserRequestDTO request, MultipartFile file) throws IOException;
 
     PageResponse<?> getAllUser(int page, int pageSize);
 

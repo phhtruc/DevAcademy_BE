@@ -12,10 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,8 +28,9 @@ public class AuthenticationController {
     UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid UserRequestDTO request){
-        return JsonResponse.ok(userService.addUser(request));
+    public ResponseEntity<?> register(@ModelAttribute @Valid UserRequestDTO request,
+                                      @RequestParam(required = false) MultipartFile file) throws IOException {
+        return JsonResponse.ok(userService.addUser(request, file));
     }
 
     @PostMapping("/login")

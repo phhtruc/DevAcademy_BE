@@ -38,8 +38,9 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addUser(@RequestBody @Valid UserRequestDTO request) {
-        return JsonResponse.ok(userService.addUser(request));
+    public ResponseEntity<?> addUser(@ModelAttribute @Valid UserRequestDTO request,
+                                     @RequestParam(required = false) MultipartFile avatar) throws IOException {
+        return JsonResponse.ok(userService.addUser(request, avatar));
     }
 
     @PreAuthorize("hasAuthority('USER')")
