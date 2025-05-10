@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Confirm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border: 0.5px solid black;
+        }
+
+        .header {
+            background-color: #28a745;
+            padding: 10px;
+            text-align: center;
+            color: #ffffff;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .content {
+            padding: 20px;
+            text-align: left;
+            color: #333333;
+        }
+
+        .content h2 {
+            color: #28a745;
+        }
+
+        .content p {
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Mua khóa học thành công</h1>
+    </div>
+    <div class="content">
+        <h2>Xin chào! <span th:text="${userName}">Tên người dùng</span>,</h2>
+        <p>
+            Chúc mừng! Bạn đã mua thành công khóa học
+            <strong th:text="${courseName}">Tên khóa học</strong>. Chúng tôi rất vui mừng đồng hành cùng bạn trong suốt
+            hành trình học tập này.
+        </p>
+        <p>
+            Hãy kiểm tra lại thông tin khóa học và thời gian bắt đầu để đảm bảo bạn không bỏ lỡ bất kỳ điều gì nhé.
+        </p>
+    </div>
+    <div class="footer">
+        <p>Cảm ơn bạn đã tin tưởng và lựa chọn nền tảng của chúng tôi.</p>
+        <p>TechLearn, 6 Trần Phú, Thạch Thang, Hải Châu, Đà Nẵng</p>
+    </div>
+</div>
+</body>
+</html>
