@@ -1,11 +1,13 @@
 package com.devacademy.DevAcademy_BE.controller;
 
+import com.devacademy.DevAcademy_BE.dto.userDTO.AdminRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
 import com.devacademy.DevAcademy_BE.service.CourseService;
 import com.devacademy.DevAcademy_BE.service.UserService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +41,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addUser(@ModelAttribute @Valid UserRequestDTO request,
-                                     @RequestParam(required = false) MultipartFile avatar) throws IOException {
+    public ResponseEntity<?> addUser(@ModelAttribute @Valid AdminRequestDTO request,
+                                     @RequestParam(required = false) MultipartFile avatar) throws IOException, MessagingException {
         return JsonResponse.ok(userService.addUser(request, avatar));
     }
 
@@ -77,4 +79,5 @@ public class UserController {
                                         @RequestParam(required = false, defaultValue = "10") int pageSize) {
         return JsonResponse.ok(userService.searchUser(searchDTO, page, pageSize));
     }
+
 }

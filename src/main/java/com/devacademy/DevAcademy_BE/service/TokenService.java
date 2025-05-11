@@ -52,4 +52,9 @@ public class TokenService {
     private String buildKey(UUID userId, String token) {
         return "token:" + userId + ":" + token;
     }
+
+    public void deleteToken(UUID userId, String token) {
+        String key = buildKey(userId, token);
+        redisTemplate.delete(key);
+    }
 }

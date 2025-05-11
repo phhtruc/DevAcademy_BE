@@ -13,13 +13,11 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserRequestDTO {
+public class AdminRequestDTO {
     @NotBlank(message = "FULL_NAME_INVALID")
     String fullName;
     @NotBlank(message = "EMAIL_INVALID")
     String email;
-    @NotNull(message = "PASSWORD_INVALID")
-    String password;
     @Pattern(regexp = "ADMIN|TEACHER|USER", message = "ROLE_INVALID_TYPE")
     String roles;
 }

@@ -1,10 +1,8 @@
 package com.devacademy.DevAcademy_BE.service.impl;
 
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserResponseDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
+import com.devacademy.DevAcademy_BE.dto.UserRegistrationTask;
+import com.devacademy.DevAcademy_BE.dto.userDTO.*;
 import com.devacademy.DevAcademy_BE.entity.RoleEntity;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.entity.UserHasRoleEntity;
@@ -17,9 +15,8 @@ import com.devacademy.DevAcademy_BE.repository.RoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserHasRoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
 import com.devacademy.DevAcademy_BE.repository.specification.UserSpecification;
-import com.devacademy.DevAcademy_BE.service.CloudinaryService;
-import com.devacademy.DevAcademy_BE.service.TokenService;
-import com.devacademy.DevAcademy_BE.service.UserService;
+import com.devacademy.DevAcademy_BE.service.*;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +46,8 @@ public class UserServiceImpl implements UserService {
     PasswordEncoder passwordEncoder;
     CloudinaryService cloudinaryService;
     TokenService tokenService;
+    JwtService jwtService;
+    UserRegistrationQueueService userRegistrationQueueService;
 
     @Override
     public UserResponseDTO getUserById(UUID id) {
@@ -57,13 +56,14 @@ public class UserServiceImpl implements UserService {
         var user = userMapper.toUserResponseDTO(userEntity);
         user.setRoles(userEntity.getAuthorities().toString());
         return user;
+
     }
 
     @Override
     public UserResponseDTO setActive(UUID id) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
-        if (userEntity.getStatus() == UserStatus.ACTIVE) {
+        if (userEntity.getStatus() != UserStatus.INACTIVE) {
             userEntity.setStatus(UserStatus.INACTIVE);
         } else {
             userEntity.setStatus(UserStatus.ACTIVE);
@@ -86,6 +86,29 @@ public class UserServiceImpl implements UserService {
         return getPageResponse(page, pageSize, users);
     }
 
+    @Override
+    @Transactional
+    public UserResponseDTO register(UserRequestDTO request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ApiException(ErrorCode.EMAIL_EXISTS);
+        }
+
+        UserEntity user = userMapper.toUserEntity(request);
+        user.setIsDeleted(false);
+        user.setStatus(UserStatus.ACTIVE);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        UserEntity savedUser = userRepository.save(user);
+
+        RoleEntity resolvedRole = resolveRole(request.getRoles());
+        associateRoleWithUser(savedUser, resolvedRole);
+
+        UserResponseDTO userMap = userMapper.toUserResponseDTO(savedUser);
+        userMap.setRoles(resolvedRole.getName().toString());
+
+        return userMap;
+    }
+
     private PageResponse<?> getPageResponse(int page, int pageSize, Page<UserEntity> users) {
         List<UserResponseDTO> list = users.stream()
                 .map(userMap -> {
@@ -105,27 +128,32 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserResponseDTO addUser(UserRequestDTO request, MultipartFile file) throws IOException {
+    public UserResponseDTO addUser(AdminRequestDTO request, MultipartFile file) throws IOException, MessagingException {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ApiException(ErrorCode.EMAIL_EXISTS);
         }
 
         UserEntity user = userMapper.toUserEntity(request);
         user.setIsDeleted(false);
-        user.setStatus(UserStatus.ACTIVE);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setStatus(UserStatus.PENDING);
 
-        if (file != null && !file.isEmpty()) {
-            user.setAvatar(cloudinaryService.uploadImage(file));
-        }
-
-        var savedUser = userRepository.save(user);
+        UserEntity savedUser = userRepository.saveAndFlush(user);
 
         RoleEntity resolvedRole = resolveRole(request.getRoles());
         associateRoleWithUser(savedUser, resolvedRole);
 
-        var userMap = userMapper.toUserResponseDTO(savedUser);
+        String token = jwtService.generateToken(user);
+        tokenService.saveToken(savedUser, token, 1440);
+
+        if (file != null && !file.isEmpty()) {
+            userRegistrationQueueService.addToQueue(new UserRegistrationTask(file, savedUser.getId(), token));
+        } else {
+            userRegistrationQueueService.addToQueue(new UserRegistrationTask(null, savedUser.getId(), token));
+        }
+
+        UserResponseDTO userMap = userMapper.toUserResponseDTO(savedUser);
         userMap.setRoles(resolvedRole.getName().toString());
+
         return userMap;
     }
 
