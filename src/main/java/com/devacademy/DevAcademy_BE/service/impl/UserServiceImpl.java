@@ -46,7 +46,6 @@ public class UserServiceImpl implements UserService {
     PasswordEncoder passwordEncoder;
     CloudinaryService cloudinaryService;
     TokenService tokenService;
-    MailService mailService;
     JwtService jwtService;
     UserRegistrationQueueService userRegistrationQueueService;
 
@@ -64,7 +63,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO setActive(UUID id) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
-        if (userEntity.getStatus() == UserStatus.ACTIVE) {
+        if (userEntity.getStatus() != UserStatus.INACTIVE) {
             userEntity.setStatus(UserStatus.INACTIVE);
         } else {
             userEntity.setStatus(UserStatus.ACTIVE);
