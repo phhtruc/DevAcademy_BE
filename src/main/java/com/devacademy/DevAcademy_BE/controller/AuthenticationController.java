@@ -1,10 +1,12 @@
 package com.devacademy.DevAcademy_BE.controller;
 
 import com.devacademy.DevAcademy_BE.auth.AuthenticationRequest;
+import com.devacademy.DevAcademy_BE.dto.ResetPasswordDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
 import com.devacademy.DevAcademy_BE.service.AuthenticationService;
 import com.devacademy.DevAcademy_BE.service.UserService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -28,9 +30,8 @@ public class AuthenticationController {
     UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@ModelAttribute @Valid UserRequestDTO request,
-                                      @RequestParam(required = false) MultipartFile file) throws IOException {
-        return JsonResponse.ok(userService.addUser(request, file));
+    public ResponseEntity<?> register(@RequestBody @Valid UserRequestDTO request){
+        return JsonResponse.ok(userService.register(request));
     }
 
     @PostMapping("/login")
@@ -41,5 +42,17 @@ public class AuthenticationController {
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
         return JsonResponse.ok(authenticationService.refreshToken(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+        authenticationService.resetPassword(resetPasswordDTO);
+        return ResponseEntity.ok("Password reset successfully!");
+    }
+
+    @GetMapping("/verify-token/{token}")
+    public ResponseEntity<String> verifyToken(@PathVariable String token) {
+        authenticationService.verifyToken(token);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,10 +1,8 @@
 package com.devacademy.DevAcademy_BE.service;
 
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserResponseDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
+import com.devacademy.DevAcademy_BE.dto.userDTO.*;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +13,7 @@ import java.util.UUID;
 @Service
 public interface UserService {
 
-    UserResponseDTO addUser(UserRequestDTO request, MultipartFile file) throws IOException;
+    UserResponseDTO addUser(AdminRequestDTO request, MultipartFile file) throws IOException, MessagingException;
 
     PageResponse<?> getAllUser(int page, int pageSize);
 
@@ -28,4 +26,6 @@ public interface UserService {
     UserResponseDTO setActive(UUID id);
 
     PageResponse<?> searchUser(@Valid UserSearchDTO searchDTO, int page, int pageSize);
+
+    UserResponseDTO register(@Valid UserRequestDTO request);
 }

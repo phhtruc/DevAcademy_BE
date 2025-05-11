@@ -21,6 +21,7 @@ public enum ErrorCode {
     UPDATE_SUCCESSFUL(1013, "Update successful", HttpStatus.OK),
     INVALID_DATA(1014, "Invalid data", HttpStatus.BAD_REQUEST),
     REVIEW_NOT_FOUND(1020, "Review not found", HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN(1021, "Invalid or expired token", HttpStatus.BAD_REQUEST),
 
     // Auth and User 1***
     EMAIL_INVALID(1000, "Email invalid", HttpStatus.BAD_REQUEST),
