@@ -5,6 +5,7 @@ import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearcchDTO;
 import com.devacademy.DevAcademy_BE.service.ChapterService;
 import com.devacademy.DevAcademy_BE.service.CourseService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,6 @@ public class CourseController {
         return JsonResponse.ok(courseService.getAllCourse(page, pageSize));
     }
 
-    @PreAuthorize("hasAnyAuthority('USER', 'TEACHER')")
     @GetMapping("/user")
     public ResponseEntity<?> getAllCourseForUser(@RequestParam(required = false, defaultValue = "1") int page,
                                                  @RequestParam(required = false, defaultValue = "10") int pageSize) {

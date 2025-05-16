@@ -33,7 +33,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/v1/auth/**",
-                                "/swagger-ui/**")
+                                "/swagger-ui/**",
+                                "/api/v1/courses/user",
+                                "/api/v1/categories")
                         .permitAll()
                         .requestMatchers("/api/v1/users/**").hasAuthority(RoleType.ADMIN.name())
                         .requestMatchers("/api/v1/courses/**").hasAnyAuthority(RoleType.TEACHER.name())
