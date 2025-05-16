@@ -26,4 +26,5 @@ public class CourseResponseDTO {
     List<TechStackResponseDTO> techStacks;
     CategoryResponseDTO category;
     String duration;
+    Integer lessonCount;
 }

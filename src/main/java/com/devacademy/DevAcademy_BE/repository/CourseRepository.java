@@ -21,4 +21,13 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long>, Jpa
             WHERE cr.userEntity.id = :userId AND cr.status = 'CONFIRMED'
             """)
     Page<CourseEntity> findAllByUserId(Pageable pageable, UUID userId);
+
+    @Query("""
+            SELECT count(l.id) as lessonCount
+            FROM CourseEntity c
+            JOIN ChapterEntity ct ON c.id = ct.courseEntity.id
+            JOIN LessonEntity l ON ct.id = l.chapterEntity.id
+            WHERE l.type = 'LECTURES' OR l.type = 'READINGS' AND c.id = :courseId
+            """)
+    Integer CountLessonsByCourse(Long courseId);
 }

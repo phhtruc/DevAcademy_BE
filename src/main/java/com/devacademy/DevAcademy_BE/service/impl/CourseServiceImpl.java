@@ -115,7 +115,6 @@ public class CourseServiceImpl implements CourseService {
     public PageResponse<?> getAllCourseForUser(int page, int pageSize) {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
         Page<CourseEntity> course = courseRepository.findAllPublicCourses(pageable);
-
         return getPageResponse(page, pageSize, course, null);
     }
 
@@ -186,8 +185,10 @@ public class CourseServiceImpl implements CourseService {
         List<CourseResponseDTO> list = course.stream()
                 .map(courseEntity -> {
                     var listTechStack = getTechStacksByCourse(courseEntity);
+                    var lessonCount = getLessonCountByCourse(courseEntity.getId());
                     var courseMap = courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
                     courseMap.setCategory(getCategory(courseEntity));
+                    courseMap.setLessonCount(lessonCount);
                     if(id != null){
                         courseMap.setRegisterType(getRegisterTypes(id, courseEntity));
                         return courseMap;
@@ -230,5 +231,9 @@ public class CourseServiceImpl implements CourseService {
         var courseHasCategory = categoryRepository.findByCourseId(course.getId())
                 .orElse(null);
         return categoryMapper.toCategoryResponseDTO(courseHasCategory);
+    }
+
+    private int getLessonCountByCourse(Long courseId) {
+        return courseRepository.CountLessonsByCourse(courseId);
     }
 }
