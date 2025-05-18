@@ -30,4 +30,13 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long>, Jpa
             WHERE l.type = 'LECTURES' OR l.type = 'READINGS' AND c.id = :courseId
             """)
     Integer CountLessonsByCourse(Long courseId);
+
+    @Query("""
+            SELECT count(l.id) as lessonCount
+            FROM CourseEntity c
+            JOIN ChapterEntity ct ON c.id = ct.courseEntity.id
+            JOIN LessonEntity l ON ct.id = l.chapterEntity.id
+            WHERE ct.id = :chapterId
+            """)
+    Integer CountLessonsByChapter(Long chapterId);
 }

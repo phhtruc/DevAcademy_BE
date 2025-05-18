@@ -48,7 +48,7 @@ public class ChapterServiceImpl implements ChapterService {
                 .orElseThrow(() -> new ApiException(ErrorCode.CHAPTER_NOT_EXISTED));
         var chapterEntity = chapterMapper.toChapterEntity(request);
         var chapter_order = chapterRepository.findMaxOrderByCourseId(Long.parseLong(request.getCourseId()));
-        chapterEntity.setChapterOrder(chapter_order != null? chapter_order + 1 : 1);
+        chapterEntity.setChapterOrder(chapter_order != null ? chapter_order + 1 : 1);
         chapterEntity.setIsDeleted(false);
         return chapterMapper.toChapterResponseDTO(chapterRepository.save(chapterEntity));
     }
@@ -79,8 +79,11 @@ public class ChapterServiceImpl implements ChapterService {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize,
                 Sort.by("chapterOrder"));
         Page<ChapterEntity> chapter = chapterRepository.findAllByCourseEntityId(id, pageable);
-        List<ChapterResponseDTO> list = chapter.map(chapterMapper::toChapterResponseDTO)
-                .stream().collect(Collectors.toList());
+        List<ChapterResponseDTO> list = chapter.map(chapterEntity -> {
+            ChapterResponseDTO responseDTO = chapterMapper.toChapterResponseDTO(chapterEntity);
+            responseDTO.setLessonCount(getLessonCountByChapter(chapterEntity.getId()));
+            return responseDTO;
+        }).stream().collect(Collectors.toList());
         return PageResponse.builder()
                 .page(page)
                 .pageSize(pageSize)
@@ -121,5 +124,9 @@ public class ChapterServiceImpl implements ChapterService {
                         .orElseThrow(() -> new ApiException(ErrorCode.LESSON_NOT_EXISTED)))
                 .collect(Collectors.toList());
         chapterRepository.saveAll(lessonsToUpdate);
+    }
+
+    private int getLessonCountByChapter(Long chapterId) {
+        return courseRepository.CountLessonsByChapter(chapterId);
     }
 }

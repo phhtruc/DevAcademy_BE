@@ -14,4 +14,5 @@ public class ChapterResponseDTO {
     String name;
     Integer chapterOrder;
     Long courseId;
+    Integer lessonCount;
 }
