@@ -28,9 +28,6 @@ public class ChapterEntity extends BaseEntity {
     @Column(name = "thuTuChuong")
     Integer chapterOrder;
 
-    @Column(name = "congKhai")
-    Boolean isPublic;
-
     @Column(name = "xoa")
     Boolean isDeleted;
 

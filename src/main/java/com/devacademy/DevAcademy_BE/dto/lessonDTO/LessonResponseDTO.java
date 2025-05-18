@@ -19,4 +19,5 @@ public class LessonResponseDTO {
     String videoUrl;
     String contentRefer;
     String chapter;
+    Boolean isPublic;
 }

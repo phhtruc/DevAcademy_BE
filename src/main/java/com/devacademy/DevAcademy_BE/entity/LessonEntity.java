@@ -43,6 +43,9 @@ public class LessonEntity extends BaseEntity {
     @Column(name = "xoa")
     Boolean isDeleted;
 
+    @Column(name = "congKhai")
+    Boolean isPublic;
+
     @ManyToOne()
     @JoinColumn(name = "idChuong")
     ChapterEntity chapterEntity;

@@ -89,7 +89,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public LessonResponseDTO updateLesson(Long id, LessonRequestDTO request, MultipartFile video) {
-        lessonRepository.findById(id).orElseThrow(() ->
+        var existingLesson = lessonRepository.findById(id).orElseThrow(() ->
                 new ApiException(ErrorCode.LESSON_NOT_EXISTED));
         chapterRepository.findById(Long.parseLong(request.getChapterId()))
                 .orElseThrow(() -> new ApiException(ErrorCode.CHAPTER_NOT_FOUND));
@@ -97,7 +97,7 @@ public class LessonServiceImpl implements LessonService {
         var lesson = lessonMapper.toLessonEntity(request);
         lesson.setId(id);
         lesson.setIsDeleted(false);
-
+        lesson.setLessonOrder(existingLesson.getLessonOrder());
         var savedLesson = lessonRepository.save(lesson);
 
         if (video != null && !video.isEmpty()) {

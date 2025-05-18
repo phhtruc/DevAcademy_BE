@@ -13,6 +13,5 @@ public class ChapterResponseDTO {
     Long id;
     String name;
     Integer chapterOrder;
-    Boolean isPublic;
     Long courseId;
 }

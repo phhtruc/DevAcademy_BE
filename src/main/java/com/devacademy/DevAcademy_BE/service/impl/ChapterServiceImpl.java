@@ -55,13 +55,14 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public ChapterResponseDTO updateChapter(Long id, ChapterRequestDTO request) {
-        chapterRepository.findById(id)
+        var chapter = chapterRepository.findById(id)
                 .orElseThrow(() -> new ApiException(ErrorCode.CHAPTER_NOT_EXISTED));
         courseRepository.findById(Long.parseLong(request.getCourseId()))
                 .orElseThrow(() -> new ApiException(ErrorCode.COURSE_NOT_EXISTED));
         var chapterEntity = chapterMapper.toChapterEntity(request);
         chapterEntity.setId(id);
         chapterEntity.setIsDeleted(false);
+        chapterEntity.setChapterOrder(chapter.getChapterOrder());
         return chapterMapper.toChapterResponseDTO(chapterRepository.save(chapterEntity));
     }
 

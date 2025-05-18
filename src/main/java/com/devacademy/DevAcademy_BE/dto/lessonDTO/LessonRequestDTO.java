@@ -25,4 +25,6 @@ public class LessonRequestDTO {
     String contentRefer;
     @NotBlank(message = "CHAPTER_ID_INVALID")
     String chapterId;
+    @NotBlank(message = "CHAPTER_IS_PUBLIC_INVALID")
+    String isPublic;
 }
