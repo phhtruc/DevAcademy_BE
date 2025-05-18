@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Getter
@@ -42,4 +43,7 @@ public class CourseEntity extends BaseEntity {
 
     @Column(name = "thoiHan")
     Integer duration;
+
+    @OneToMany(mappedBy = "courseEntity")
+    List<CourseHasCategoryEntity> courseCategories;
 }

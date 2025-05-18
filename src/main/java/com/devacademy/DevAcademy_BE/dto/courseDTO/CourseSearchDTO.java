@@ -5,7 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CourseSearcchDTO {
+public class CourseSearchDTO {
     private String name;
     private String type;
+    private String categoryId;
 }

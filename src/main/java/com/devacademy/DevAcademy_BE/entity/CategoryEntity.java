@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Where;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -25,4 +27,8 @@ public class CategoryEntity extends BaseEntity {
 
     @Column(name = "xoa")
     Boolean isDeleted;
+
+    @OneToMany(mappedBy = "categoryEntity")
+    List<CourseHasCategoryEntity> categoryCourses;
+
 }

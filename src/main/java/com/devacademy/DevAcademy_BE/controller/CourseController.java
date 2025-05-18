@@ -1,11 +1,10 @@
 package com.devacademy.DevAcademy_BE.controller;
 
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseRequestDTO;
-import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearcchDTO;
+import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearchDTO;
 import com.devacademy.DevAcademy_BE.service.ChapterService;
 import com.devacademy.DevAcademy_BE.service.CourseService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
-import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +37,6 @@ public class CourseController {
         return JsonResponse.ok(courseService.getAllCourseForUser(page, pageSize));
     }
 
-    @PreAuthorize("hasAnyAuthority('USER', 'TEACHER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getCourseById(@PathVariable Long id) {
         return JsonResponse.ok(courseService.getCourseById(id));
@@ -71,7 +69,7 @@ public class CourseController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchProperties(@Valid CourseSearcchDTO searchDTO,
+    public ResponseEntity<?> searchProperties(@Valid CourseSearchDTO searchDTO,
                                               @RequestParam(required = false, defaultValue = "1") int page,
                                               @RequestParam(required = false, defaultValue = "10") int pageSize,
                                               @RequestParam(required = false) String sortPrice) {

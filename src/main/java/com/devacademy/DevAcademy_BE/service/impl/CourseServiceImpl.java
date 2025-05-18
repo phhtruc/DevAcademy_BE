@@ -4,8 +4,7 @@ import com.devacademy.DevAcademy_BE.dto.categoryDTO.CategoryResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseResponseDTO;
-import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearcchDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
+import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearchDTO;
 import com.devacademy.DevAcademy_BE.entity.*;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
 import com.devacademy.DevAcademy_BE.enums.RegisterType;
@@ -61,6 +60,7 @@ public class CourseServiceImpl implements CourseService {
                 new ApiException(ErrorCode.COURSE_NOT_EXISTED));
         var courseMap = courseMapper.toCourseResponseDTO(course, getTechStacksByCourse(course));
         courseMap.setCategory(getCategory(course));
+        courseMap.setLessonCount(getLessonCountByCourse(course.getId()));
         return courseMap;
     }
 
@@ -119,12 +119,13 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public PageResponse<?> searchCourse(CourseSearcchDTO searchDTO, int page, int pageSize, String sortPrice) {
+    public PageResponse<?> searchCourse(CourseSearchDTO searchDTO, int page, int pageSize, String sortPrice) {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
 
         Specification<CourseEntity> spec = Specification
                 .where(CourseSpecification.hasTitle(searchDTO.getName()))
                 .and(CourseSpecification.hasCourseType(searchDTO.getType()))
+                .and(CourseSpecification.hasCateId(searchDTO.getCategoryId()))
                 .and(CourseSpecification.sortPrice(sortPrice));
 
         Page<CourseEntity> courseEntityPage = courseRepository.findAll(spec, pageable);
