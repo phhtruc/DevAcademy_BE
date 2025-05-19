@@ -6,7 +6,6 @@ import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
 import com.devacademy.DevAcademy_BE.service.AuthenticationService;
 import com.devacademy.DevAcademy_BE.service.UserService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
-import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -15,9 +14,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor

@@ -105,7 +105,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private AuthenticationResponse buildAuthenticationResponse(UserEntity user, String accessToken, String refreshToken,
                                                                String message) {
         redisTokenService.revokeAllUserTokens(user.getId());
-        redisTokenService.saveToken(user, accessToken, 20);
+        redisTokenService.saveToken(user, accessToken, 30);
         redisTokenService.saveToken(user, refreshToken, 11111);
 
         return AuthenticationResponse.builder()

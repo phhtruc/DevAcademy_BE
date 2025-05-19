@@ -12,17 +12,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Endpoint client kết nối đến (ví dụ: "/ws")
+        // Endpoint để client kết nối websocket
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("http://localhost:5173");
+                .setAllowedOriginPatterns("*");
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Client subscribe prefix (ví dụ: "/topic")
-        registry.enableSimpleBroker("/topic");
-
-        // Prefix cho các message gửi từ client (ví dụ: "/app")
+        // Dùng /app cho các message gửi từ client đến server
         registry.setApplicationDestinationPrefixes("/app");
+
+        // Dùng /topic cho các message gửi từ server đến client
+        registry.enableSimpleBroker("/topic");
     }
 }
+
