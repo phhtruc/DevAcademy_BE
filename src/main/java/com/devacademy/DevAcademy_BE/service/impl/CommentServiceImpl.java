@@ -55,14 +55,10 @@ public class CommentServiceImpl implements CommentService {
         CommentEntity originalComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ApiException(ErrorCode.COMMENT_NOT_EXISTED));
 
-//        Integer originalCommentId = originalComment.getIdOriginalComment() != null ?
-//                originalComment.getIdOriginalComment() : originalComment.getId().intValue();
-
         CommentEntity comment = CommentEntity.builder()
                 .content(request.getContent())
                 .lessonEntity(originalComment.getLessonEntity())
                 .user(user)
-                //.idOriginalComment(originalCommentId)
                 .idOriginalComment(originalComment.getIdOriginalComment())
                 .isDeleted(false)
                 .build();
@@ -78,7 +74,9 @@ public class CommentServiceImpl implements CommentService {
 
         Optional<CommentLikeEntity> existingLike = commentLikeRepository
                 .findByUserIdAndCommentEntityId(user.getId(), commentId);
-        
+
+        boolean isLiked = false;
+
         if(existingLike.isEmpty()){
             CommentLikeEntity commentLike = CommentLikeEntity.builder()
                     .user(user)
@@ -86,22 +84,42 @@ public class CommentServiceImpl implements CommentService {
                     .isDeleted(false)
                     .build();
             commentLikeRepository.save(commentLike);
-        } else if (Boolean.TRUE.equals(existingLike.get().getIsDeleted())) {
+            isLiked = true;
+        } else if (existingLike.get().getIsDeleted()) {
             existingLike.get().setIsDeleted(false);
             commentLikeRepository.save(existingLike.get());
+        } else {
+            isLiked = true;
         }
 
-        int likeCount = commentLikeRepository.countByCommentEntityId(commentId);
+        int likeCount = commentLikeRepository.countByCommentEntityIdAndIsDeletedFalse(commentId);
         return LikeCommentResponse.builder()
                 .commentId(commentId)
                 .likeCount(likeCount)
-                .isLiked(false)
+                .isLiked(isLiked)
                 .build();
     }
 
     @Override
     public LikeCommentResponse unlikeComment(Long commentId, Authentication authentication) {
-        return null;
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+        commentRepository.findById(commentId)
+                .orElseThrow(() -> new ApiException(ErrorCode.COMMENT_NOT_EXISTED));
+
+        Optional<CommentLikeEntity> existingLike = commentLikeRepository
+                .findByUserIdAndCommentEntityId(user.getId(), commentId);
+
+        if(existingLike.isPresent() && !existingLike.get().getIsDeleted()){
+            existingLike.get().setIsDeleted(true);
+            commentLikeRepository.save(existingLike.get());
+        }
+
+        int likeCount = commentLikeRepository.countByCommentEntityIdAndIsDeletedFalse(commentId);
+        return LikeCommentResponse.builder()
+                .commentId(commentId)
+                .likeCount(likeCount)
+                .isLiked(false)
+                .build();
     }
 
     @Override

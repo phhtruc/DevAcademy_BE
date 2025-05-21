@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public interface CommentLikeRepository extends JpaRepository<CommentLikeEntity, Long> {
     Optional<CommentLikeEntity> findByUserIdAndCommentEntityId(UUID userId, Long commentId);
 
-    int countByCommentEntityId(Long commentId);
+    int countByCommentEntityIdAndIsDeletedFalse(Long commentId);
 
     @Query("SELECT c.commentEntity.id as commentId, COUNT(c) as likeCount FROM CommentLikeEntity c " +
             "WHERE c.commentEntity.id IN :commentIds AND c.isDeleted = false " +

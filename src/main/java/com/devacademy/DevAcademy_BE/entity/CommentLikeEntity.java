@@ -11,7 +11,6 @@ import org.hibernate.annotations.Where;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Where(clause = "xoa = false")
 @Table(name = "LUOTTHICHBINHLUAN")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentLikeEntity extends BaseEntity {
