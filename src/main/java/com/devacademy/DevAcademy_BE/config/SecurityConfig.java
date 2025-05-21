@@ -49,6 +49,7 @@ public class SecurityConfig {
                                 "/api/v1/tech-stacks/**",
                                 "/api/v1/prompts/**")
                         .hasAnyAuthority(RoleType.TEACHER.name())
+                        .requestMatchers("/api/v1/comments/**").hasAnyAuthority(RoleType.USER.name())
                         .anyRequest().authenticated())
                 .sessionManagement(session
                         -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
