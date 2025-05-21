@@ -1,6 +1,9 @@
 package com.devacademy.DevAcademy_BE.service.impl;
 
-import com.devacademy.DevAcademy_BE.dto.commentDTO.*;
+import com.devacademy.DevAcademy_BE.dto.commentDTO.CommentRequest;
+import com.devacademy.DevAcademy_BE.dto.commentDTO.CommentResponse;
+import com.devacademy.DevAcademy_BE.dto.commentDTO.CommentThreadResponse;
+import com.devacademy.DevAcademy_BE.dto.commentDTO.LikeCommentResponse;
 import com.devacademy.DevAcademy_BE.entity.CommentEntity;
 import com.devacademy.DevAcademy_BE.entity.CommentLikeEntity;
 import com.devacademy.DevAcademy_BE.entity.LessonEntity;
@@ -45,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
                 .isDeleted(false)
                 .build();
 
-        return buildCommentResponse(commentRepository.save(comment), user.getId(), 0, false);
+        return buildCommentResponse(commentRepository.save(comment), 0, false);
     }
 
     @Override
@@ -65,7 +68,7 @@ public class CommentServiceImpl implements CommentService {
                 .isDeleted(false)
                 .build();
 
-        return buildCommentResponse(commentRepository.save(comment), user.getId(), 0, false);
+        return buildCommentResponse(commentRepository.save(comment), 0, false);
     }
 
     @Override
@@ -151,7 +154,7 @@ public class CommentServiceImpl implements CommentService {
         return parentComments.stream()
                 .map(parent -> {
                     CommentResponse parentResponse = buildCommentResponse(
-                            parent, null,
+                            parent,
                             likeCounts.getOrDefault(parent.getId(), 0),
                             false);
 
@@ -159,7 +162,7 @@ public class CommentServiceImpl implements CommentService {
                             .getOrDefault(parent.getId().intValue(), new ArrayList<>())
                             .stream()
                             .map(reply -> buildCommentResponse(
-                                    reply, null,
+                                    reply,
                                     likeCounts.getOrDefault(reply.getId(), 0),
                                     false))
                             .collect(Collectors.toList());
@@ -174,11 +177,19 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(Long commentId, Authentication authentication) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+        CommentEntity comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ApiException(ErrorCode.COMMENT_NOT_EXISTED));
 
+        if (!comment.getUser().getId().equals(user.getId())) {
+            throw new ApiException(ErrorCode.DELETE_ERROR);
+        }
+
+        comment.setIsDeleted(true);
+        commentRepository.save(comment);
     }
 
-    private CommentResponse buildCommentResponse(CommentEntity comment, UUID currentUserId,
-                                                 Integer likeCount, Boolean isLiked) {
+    private CommentResponse buildCommentResponse(CommentEntity comment, Integer likeCount, Boolean isLiked) {
         return CommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())

@@ -87,6 +87,7 @@ public enum ErrorCode {
     // comment 2400**
     CONTENT_INVALID(240000, "Content cannot be blank", HttpStatus.NOT_FOUND),
     COMMENT_NOT_EXISTED(240001, "Comment not existed", HttpStatus.NOT_FOUND),
+    DELETE_ERROR(240001, "You are not authorized to delete this comment", HttpStatus.NOT_FOUND),
 
     ;
 
