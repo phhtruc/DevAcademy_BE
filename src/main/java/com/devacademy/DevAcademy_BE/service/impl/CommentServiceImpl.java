@@ -2,6 +2,7 @@ package com.devacademy.DevAcademy_BE.service.impl;
 
 import com.devacademy.DevAcademy_BE.dto.commentDTO.*;
 import com.devacademy.DevAcademy_BE.entity.CommentEntity;
+import com.devacademy.DevAcademy_BE.entity.CommentLikeEntity;
 import com.devacademy.DevAcademy_BE.entity.LessonEntity;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
@@ -18,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -70,7 +72,31 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public LikeCommentResponse likeComment(Long commentId, Authentication authentication) {
-        return null;
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+        CommentEntity comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ApiException(ErrorCode.COMMENT_NOT_EXISTED));
+
+        Optional<CommentLikeEntity> existingLike = commentLikeRepository
+                .findByUserIdAndCommentEntityId(user.getId(), commentId);
+        
+        if(existingLike.isEmpty()){
+            CommentLikeEntity commentLike = CommentLikeEntity.builder()
+                    .user(user)
+                    .commentEntity(comment)
+                    .isDeleted(false)
+                    .build();
+            commentLikeRepository.save(commentLike);
+        } else if (Boolean.TRUE.equals(existingLike.get().getIsDeleted())) {
+            existingLike.get().setIsDeleted(false);
+            commentLikeRepository.save(existingLike.get());
+        }
+
+        int likeCount = commentLikeRepository.countByCommentEntityId(commentId);
+        return LikeCommentResponse.builder()
+                .commentId(commentId)
+                .likeCount(likeCount)
+                .isLiked(false)
+                .build();
     }
 
     @Override
