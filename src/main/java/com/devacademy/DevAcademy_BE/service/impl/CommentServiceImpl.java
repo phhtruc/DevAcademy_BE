@@ -18,9 +18,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,14 +51,17 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentResponse replyToComment(Long commentId, CommentRequest request, Authentication authentication) {
         UserEntity user = (UserEntity) authentication.getPrincipal();
-        CommentEntity originalComment = commentRepository.findById(commentId)
+        CommentEntity parentComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ApiException(ErrorCode.COMMENT_NOT_EXISTED));
+
+        Integer originalCommentId = parentComment.getIdOriginalComment() != null ?
+                parentComment.getIdOriginalComment() : parentComment.getId().intValue();
 
         CommentEntity comment = CommentEntity.builder()
                 .content(request.getContent())
-                .lessonEntity(originalComment.getLessonEntity())
+                .lessonEntity(parentComment.getLessonEntity())
                 .user(user)
-                .idOriginalComment(originalComment.getIdOriginalComment())
+                .idOriginalComment(originalCommentId)
                 .isDeleted(false)
                 .build();
 
@@ -77,7 +79,7 @@ public class CommentServiceImpl implements CommentService {
 
         boolean isLiked = false;
 
-        if(existingLike.isEmpty()){
+        if (existingLike.isEmpty()) {
             CommentLikeEntity commentLike = CommentLikeEntity.builder()
                     .user(user)
                     .commentEntity(comment)
@@ -109,7 +111,7 @@ public class CommentServiceImpl implements CommentService {
         Optional<CommentLikeEntity> existingLike = commentLikeRepository
                 .findByUserIdAndCommentEntityId(user.getId(), commentId);
 
-        if(existingLike.isPresent() && !existingLike.get().getIsDeleted()){
+        if (existingLike.isPresent() && !existingLike.get().getIsDeleted()) {
             existingLike.get().setIsDeleted(true);
             commentLikeRepository.save(existingLike.get());
         }
@@ -123,8 +125,51 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentThreadResponse> getCommentsByLesson(Long lessonId, int page, int size) {
-        return List.of();
+    public List<CommentThreadResponse> getCommentsByLesson(Long lessonId) {
+        List<CommentEntity> parentComments = commentRepository
+                .findByLessonEntityIdAndIdOriginalCommentIsNullOrderByCreatedByDesc(lessonId);
+
+        if (parentComments.isEmpty())
+            return new ArrayList<>();
+
+        List<Long> parentIds = parentComments.stream()
+                .map(CommentEntity::getId)
+                .toList();
+        List<CommentEntity> replies = commentRepository
+                .findByIdOriginalCommentInOrderByCreatedByAsc(
+                        parentIds.stream().map(Long::intValue).collect(Collectors.toList()));
+
+        Map<Integer, List<CommentEntity>> repliesByParentId = replies.stream()
+                .collect(Collectors.groupingBy(CommentEntity::getIdOriginalComment));
+
+        List<Long> allCommentIds = new ArrayList<>(parentIds);
+        allCommentIds.addAll(replies.stream().map(CommentEntity::getId).toList());
+
+        Map<Long, Integer> likeCounts = commentLikeRepository
+                .countLikesByCommentIds(allCommentIds);
+
+        return parentComments.stream()
+                .map(parent -> {
+                    CommentResponse parentResponse = buildCommentResponse(
+                            parent, null,
+                            likeCounts.getOrDefault(parent.getId(), 0),
+                            false);
+
+                    List<CommentResponse> replyResponses = repliesByParentId
+                            .getOrDefault(parent.getId().intValue(), new ArrayList<>())
+                            .stream()
+                            .map(reply -> buildCommentResponse(
+                                    reply, null,
+                                    likeCounts.getOrDefault(reply.getId(), 0),
+                                    false))
+                            .collect(Collectors.toList());
+
+                    return CommentThreadResponse.builder()
+                            .comment(parentResponse)
+                            .replies(replyResponses)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -140,8 +185,8 @@ public class CommentServiceImpl implements CommentService {
                 .userId(comment.getUser().getId())
                 .username(comment.getUser().getFullName())
                 .userAvatar(comment.getUser().getAvatar())
-                .createdAt(comment.getNgayTao())
-                .updatedAt(comment.getNgaySua())
+                .createdAt(comment.getCreatedDate())
+                .updatedAt(comment.getModifiedDate())
                 .likeCount(likeCount)
                 .isLikedByCurrentUser(isLiked)
                 .build();

@@ -16,7 +16,7 @@ public interface CommentService {
 
     LikeCommentResponse unlikeComment(Long commentId, Authentication authentication);
 
-    List<CommentThreadResponse> getCommentsByLesson(Long lessonId, int page, int size);
+    List<CommentThreadResponse> getCommentsByLesson(Long lessonId);
 
     void deleteComment(Long commentId, Authentication authentication);
 }

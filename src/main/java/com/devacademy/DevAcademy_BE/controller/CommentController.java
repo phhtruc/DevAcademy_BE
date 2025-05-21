@@ -47,10 +47,8 @@ public class CommentController {
     }
 
     @GetMapping("/lessons/{lessonId}")
-    public ResponseEntity<?> getCommentsByLesson(@PathVariable Long lessonId,
-                                                 @RequestParam(defaultValue = "0") int page,
-                                                 @RequestParam(defaultValue = "10") int size) {
-        return JsonResponse.ok(commentService.getCommentsByLesson(lessonId, page, size));
+    public ResponseEntity<?> getCommentsByLesson(@PathVariable Long lessonId) {
+        return JsonResponse.ok(commentService.getCommentsByLesson(lessonId));
     }
 
     @DeleteMapping("/{commentId}")
