@@ -10,6 +10,7 @@ import com.devacademy.DevAcademy_BE.repository.CommentLikeRepository;
 import com.devacademy.DevAcademy_BE.repository.CommentRepository;
 import com.devacademy.DevAcademy_BE.repository.LessonRepository;
 import com.devacademy.DevAcademy_BE.service.CommentService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommentServiceImpl implements CommentService {
 
@@ -29,7 +31,7 @@ public class CommentServiceImpl implements CommentService {
     LessonRepository lessonRepository;
 
     @Override
-    public CommentResponse createComment(Long lessonId, CreateCommentRequest request, Authentication authentication) {
+    public CommentResponse createComment(Long lessonId, CommentRequest request, Authentication authentication) {
         UserEntity user = (UserEntity) authentication.getPrincipal();
         LessonEntity lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ApiException(ErrorCode.LESSON_NOT_EXISTED));
@@ -46,8 +48,24 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentResponse replyToComment(Long commentId, ReplyCommentRequest request, Authentication authentication) {
-        return null;
+    public CommentResponse replyToComment(Long commentId, CommentRequest request, Authentication authentication) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+        CommentEntity originalComment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ApiException(ErrorCode.COMMENT_NOT_EXISTED));
+
+//        Integer originalCommentId = originalComment.getIdOriginalComment() != null ?
+//                originalComment.getIdOriginalComment() : originalComment.getId().intValue();
+
+        CommentEntity comment = CommentEntity.builder()
+                .content(request.getContent())
+                .lessonEntity(originalComment.getLessonEntity())
+                .user(user)
+                //.idOriginalComment(originalCommentId)
+                .idOriginalComment(originalComment.getIdOriginalComment())
+                .isDeleted(false)
+                .build();
+
+        return buildCommentResponse(commentRepository.save(comment), user.getId(), 0, false);
     }
 
     @Override

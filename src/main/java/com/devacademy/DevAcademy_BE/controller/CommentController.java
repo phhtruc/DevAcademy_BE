@@ -1,9 +1,10 @@
 package com.devacademy.DevAcademy_BE.controller;
 
-import com.devacademy.DevAcademy_BE.dto.commentDTO.CreateCommentRequest;
+import com.devacademy.DevAcademy_BE.dto.commentDTO.CommentRequest;
 import com.devacademy.DevAcademy_BE.dto.commentDTO.ReplyCommentRequest;
 import com.devacademy.DevAcademy_BE.service.CommentService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,14 +22,14 @@ public class CommentController {
 
     @PostMapping("/lessons/{lessonId}")
     public ResponseEntity<?> createComment(@PathVariable Long lessonId,
-                                           @RequestBody CreateCommentRequest request,
+                                           @Valid @RequestBody CommentRequest request,
                                            Authentication authentication) {
         return JsonResponse.ok(commentService.createComment(lessonId, request, authentication));
     }
 
     @PostMapping("/{commentId}/replies")
     public ResponseEntity<?> replyToComment(@PathVariable Long commentId,
-                                            @RequestBody ReplyCommentRequest request,
+                                            @Valid @RequestBody CommentRequest request,
                                             Authentication authentication) {
         return JsonResponse.ok(commentService.replyToComment(commentId, request, authentication));
     }

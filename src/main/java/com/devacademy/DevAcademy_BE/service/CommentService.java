@@ -8,9 +8,9 @@ import java.util.List;
 
 @Service
 public interface CommentService {
-    CommentResponse createComment(Long lessonId, CreateCommentRequest request, Authentication authentication);
+    CommentResponse createComment(Long lessonId, CommentRequest request, Authentication authentication);
 
-    CommentResponse replyToComment(Long commentId, ReplyCommentRequest request, Authentication authentication);
+    CommentResponse replyToComment(Long commentId, CommentRequest request, Authentication authentication);
 
     LikeCommentResponse likeComment(Long commentId, Authentication authentication);
 

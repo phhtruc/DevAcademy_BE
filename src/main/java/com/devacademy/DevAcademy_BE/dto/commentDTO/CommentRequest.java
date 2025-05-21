@@ -10,7 +10,7 @@ import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBl
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateCommentRequest {
+public class CommentRequest {
     @NotBlank(message = "CONTENT_INVALID")
     String content;
 }
