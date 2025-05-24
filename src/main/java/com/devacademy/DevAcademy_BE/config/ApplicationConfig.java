@@ -1,5 +1,6 @@
 package com.devacademy.DevAcademy_BE.config;
 
+import com.devacademy.DevAcademy_BE.aditing.ApplicationAudiAware;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
 import lombok.AccessLevel;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -45,5 +47,10 @@ public class ApplicationConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuditorAware<String> auditorAware(){
+        return new ApplicationAudiAware();
     }
 }

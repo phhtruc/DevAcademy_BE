@@ -83,7 +83,14 @@ public enum ErrorCode {
     // prompt 2300**
     PROMPT_NOT_FOUNT(230000, "Prompt not found", HttpStatus.NOT_FOUND),
     //CATEGORY_NAME_INVALID(21001, "Category name must be not blank", HttpStatus.NOT_FOUND),
+
+    // comment 2400**
+    CONTENT_INVALID(240000, "Content cannot be blank", HttpStatus.NOT_FOUND),
+    COMMENT_NOT_EXISTED(240001, "Comment not existed", HttpStatus.NOT_FOUND),
+    DELETE_ERROR(240001, "You are not authorized to delete this comment", HttpStatus.NOT_FOUND),
+
     ;
+
     Integer code;
     String message;
     HttpStatusCode statusCode;
