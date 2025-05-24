@@ -47,8 +47,9 @@ public class CommentController {
     }
 
     @GetMapping("/lessons/{lessonId}")
-    public ResponseEntity<?> getCommentsByLesson(@PathVariable Long lessonId) {
-        return JsonResponse.ok(commentService.getCommentsByLesson(lessonId));
+    public ResponseEntity<?> getCommentsByLesson(@PathVariable Long lessonId,
+                                                 Authentication authentication) {
+        return JsonResponse.ok(commentService.getCommentsByLesson(lessonId, authentication));
     }
 
     @DeleteMapping("/{commentId}")

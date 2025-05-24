@@ -4,11 +4,13 @@ import com.devacademy.DevAcademy_BE.dto.commentDTO.CommentRequest;
 import com.devacademy.DevAcademy_BE.dto.commentDTO.CommentResponse;
 import com.devacademy.DevAcademy_BE.dto.commentDTO.CommentThreadResponse;
 import com.devacademy.DevAcademy_BE.dto.commentDTO.LikeCommentResponse;
+import com.devacademy.DevAcademy_BE.dto.websocket.WebSocketMessage;
 import com.devacademy.DevAcademy_BE.entity.CommentEntity;
 import com.devacademy.DevAcademy_BE.entity.CommentLikeEntity;
 import com.devacademy.DevAcademy_BE.entity.LessonEntity;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
+import com.devacademy.DevAcademy_BE.enums.SocketType;
 import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.repository.CommentLikeRepository;
 import com.devacademy.DevAcademy_BE.repository.CommentRepository;
@@ -18,6 +20,7 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +36,7 @@ public class CommentServiceImpl implements CommentService {
     CommentRepository commentRepository;
     CommentLikeRepository commentLikeRepository;
     LessonRepository lessonRepository;
+    SimpMessagingTemplate messagingTemplate;
 
     @Override
     public CommentResponse createComment(Long lessonId, CommentRequest request, Authentication authentication) {
@@ -47,8 +51,10 @@ public class CommentServiceImpl implements CommentService {
                 .idOriginalComment(null)
                 .isDeleted(false)
                 .build();
+        CommentResponse response = buildCommentResponse(commentRepository.save(comment), 0, false);
 
-        return buildCommentResponse(commentRepository.save(comment), 0, false);
+        sendCommentNotification(SocketType.COMMENT, lessonId, response, "/topic/lesson/" + lessonId + "/comments");
+        return response;
     }
 
     @Override
@@ -68,7 +74,11 @@ public class CommentServiceImpl implements CommentService {
                 .isDeleted(false)
                 .build();
 
-        return buildCommentResponse(commentRepository.save(comment), 0, false);
+        CommentResponse response = buildCommentResponse(commentRepository.save(comment), 0, false);
+
+        sendCommentNotification(SocketType.REPLY, comment.getLessonEntity().getId(), response,
+                "/topic/lesson/" + comment.getLessonEntity().getId() + "/comments");
+        return response;
     }
 
     @Override
@@ -80,8 +90,6 @@ public class CommentServiceImpl implements CommentService {
         Optional<CommentLikeEntity> existingLike = commentLikeRepository
                 .findByUserIdAndCommentEntityId(user.getId(), commentId);
 
-        boolean isLiked = false;
-
         if (existingLike.isEmpty()) {
             CommentLikeEntity commentLike = CommentLikeEntity.builder()
                     .user(user)
@@ -89,26 +97,34 @@ public class CommentServiceImpl implements CommentService {
                     .isDeleted(false)
                     .build();
             commentLikeRepository.save(commentLike);
-            isLiked = true;
         } else if (existingLike.get().getIsDeleted()) {
             existingLike.get().setIsDeleted(false);
             commentLikeRepository.save(existingLike.get());
-        } else {
-            isLiked = true;
         }
 
         int likeCount = commentLikeRepository.countByCommentEntityIdAndIsDeletedFalse(commentId);
-        return LikeCommentResponse.builder()
+
+        LikeCommentResponse response = LikeCommentResponse.builder()
                 .commentId(commentId)
                 .likeCount(likeCount)
-                .isLiked(isLiked)
+                .isLiked(true)
+                .userId(user.getId())
                 .build();
+
+        WebSocketMessage<LikeCommentResponse> message = WebSocketMessage.<LikeCommentResponse>builder()
+                .type(SocketType.LIKE)
+                .lessonId(comment.getLessonEntity().getId())
+                .payload(response)
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/lesson/" + comment.getLessonEntity().getId() + "/comments", message);
+        return response;
     }
 
     @Override
     public LikeCommentResponse unlikeComment(Long commentId, Authentication authentication) {
         UserEntity user = (UserEntity) authentication.getPrincipal();
-        commentRepository.findById(commentId)
+        CommentEntity comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ApiException(ErrorCode.COMMENT_NOT_EXISTED));
 
         Optional<CommentLikeEntity> existingLike = commentLikeRepository
@@ -120,17 +136,31 @@ public class CommentServiceImpl implements CommentService {
         }
 
         int likeCount = commentLikeRepository.countByCommentEntityIdAndIsDeletedFalse(commentId);
-        return LikeCommentResponse.builder()
+
+        LikeCommentResponse response = LikeCommentResponse.builder()
                 .commentId(commentId)
                 .likeCount(likeCount)
                 .isLiked(false)
+                .userId(user.getId())
                 .build();
+
+        WebSocketMessage<LikeCommentResponse> message = WebSocketMessage.<LikeCommentResponse>builder()
+                .type(SocketType.UNLIKE)
+                .lessonId(comment.getLessonEntity().getId())
+                .payload(response)
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/lesson/" + comment.getLessonEntity().getId() + "/comments", message);
+        return response;
     }
 
     @Override
-    public List<CommentThreadResponse> getCommentsByLesson(Long lessonId) {
+    public List<CommentThreadResponse> getCommentsByLesson(Long lessonId, Authentication authentication) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+        UUID currentUserId = user.getId();
+
         List<CommentEntity> parentComments = commentRepository
-                .findByLessonEntityIdAndIdOriginalCommentIsNullOrderByCreatedByDesc(lessonId);
+                .findByLessonEntityIdAndIdOriginalCommentIsNullOrderByCreatedDateDesc(lessonId);
 
         if (parentComments.isEmpty())
             return new ArrayList<>();
@@ -151,12 +181,23 @@ public class CommentServiceImpl implements CommentService {
         Map<Long, Integer> likeCounts = commentLikeRepository
                 .countLikesByCommentIds(allCommentIds);
 
+        Set<Long> userLikedComments = new HashSet<>();
+        if (currentUserId != null) {
+            userLikedComments = commentLikeRepository.findByUserIdAndCommentEntityIdInAndIsDeletedFalse(
+                            currentUserId, allCommentIds)
+                    .stream()
+                    .map(like -> like.getCommentEntity().getId())
+                    .collect(Collectors.toSet());
+        }
+
+        final Set<Long> finalUserLikedComments = userLikedComments;
+
         return parentComments.stream()
                 .map(parent -> {
                     CommentResponse parentResponse = buildCommentResponse(
                             parent,
                             likeCounts.getOrDefault(parent.getId(), 0),
-                            false);
+                            finalUserLikedComments.contains(parent.getId())); // Check if user liked this comment
 
                     List<CommentResponse> replyResponses = repliesByParentId
                             .getOrDefault(parent.getId().intValue(), new ArrayList<>())
@@ -164,7 +205,7 @@ public class CommentServiceImpl implements CommentService {
                             .map(reply -> buildCommentResponse(
                                     reply,
                                     likeCounts.getOrDefault(reply.getId(), 0),
-                                    false))
+                                    finalUserLikedComments.contains(reply.getId()))) // Check if user liked this reply
                             .collect(Collectors.toList());
 
                     return CommentThreadResponse.builder()
@@ -187,6 +228,14 @@ public class CommentServiceImpl implements CommentService {
 
         comment.setIsDeleted(true);
         commentRepository.save(comment);
+
+        WebSocketMessage<Long> message = WebSocketMessage.<Long>builder()
+                .type(SocketType.DELETE)
+                .lessonId(comment.getLessonEntity().getId())
+                .payload(commentId)
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/lesson/" + comment.getLessonEntity().getId() + "/comments", message);
     }
 
     private CommentResponse buildCommentResponse(CommentEntity comment, Integer likeCount, Boolean isLiked) {
@@ -200,6 +249,18 @@ public class CommentServiceImpl implements CommentService {
                 .updatedAt(comment.getModifiedDate())
                 .likeCount(likeCount)
                 .isLikedByCurrentUser(isLiked)
+                .idOriginalComment(comment.getIdOriginalComment() != null ?
+                        comment.getIdOriginalComment().longValue() : null)
                 .build();
+    }
+
+    private void sendCommentNotification(SocketType type, Long lessonId, CommentResponse response, String url) {
+        WebSocketMessage<CommentResponse> message = WebSocketMessage.<CommentResponse>builder()
+                .type(type)
+                .lessonId(lessonId)
+                .payload(response)
+                .build();
+
+        messagingTemplate.convertAndSend(url, message);
     }
 }

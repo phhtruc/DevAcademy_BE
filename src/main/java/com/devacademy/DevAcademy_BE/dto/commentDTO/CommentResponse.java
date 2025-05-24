@@ -22,4 +22,5 @@ public class CommentResponse {
     LocalDateTime updatedAt;
     Integer likeCount;
     Boolean isLikedByCurrentUser;
+    Long idOriginalComment;
 }

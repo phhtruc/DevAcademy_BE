@@ -29,4 +29,6 @@ public interface CommentLikeRepository extends JpaRepository<CommentLikeEntity, 
                         arr -> ((Number) arr[1]).intValue()
                 ));
     }
+
+    List<CommentLikeEntity> findByUserIdAndCommentEntityIdInAndIsDeletedFalse(UUID userId, List<Long> commentIds);
 }
