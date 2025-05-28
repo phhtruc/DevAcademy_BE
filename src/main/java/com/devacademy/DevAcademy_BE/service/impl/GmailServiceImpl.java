@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -40,23 +39,10 @@ public class GmailServiceImpl implements MailService {
     }
 
     @Override
-    public void buyCourseMail(String studentName, List<String> teacherName, String courseName, List<String> teacherEmailAddress, String userEmailAddress) throws MessagingException {
-        // TODO: Implement business logic here if required
-    }
-
-    @Override
-    public void sendSimpleEmail(String toEmail, String subject, String body) {
-        try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setTo(toEmail);
-            helper.setSubject(subject);
-            helper.setText(body, false); // Plain text email
-            helper.setFrom(SPRING_MAIL_USERNAME);
-            javaMailSender.send(message);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email", e);
-        }
+    public void buyCourseMail(String userName, String courseName, String toEmail, String subject, String title, String description) throws MessagingException {
+        Context context = createContext(userName, courseName);
+        String htmlContent = templateEngine.process("email/buy-course-user", context);
+        sendHtmlEmail(toEmail, subject, htmlContent);
     }
 
     private void sendHtmlEmail(String toEmail, String subject, String htmlContent) throws MessagingException {

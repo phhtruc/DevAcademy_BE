@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,7 +26,9 @@ public class PaymentController {
     }
 
     @GetMapping("/payment-return")
-    public ResponseEntity<?> paymentReturn(HttpServletRequest request) {
-        return JsonResponse.ok(vnPayService.processPaymentReturn(request));
+    public ResponseEntity<?> paymentReturn(HttpServletRequest request,
+                                           Authentication authentication,
+                                           @RequestParam Long courseId) {
+        return JsonResponse.ok(vnPayService.processPaymentReturn(request, authentication, courseId));
     }
 }

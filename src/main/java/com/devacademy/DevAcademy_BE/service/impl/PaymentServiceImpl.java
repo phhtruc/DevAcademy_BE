@@ -3,17 +3,30 @@ package com.devacademy.DevAcademy_BE.service.impl;
 import com.devacademy.DevAcademy_BE.config.VNPayConfig;
 import com.devacademy.DevAcademy_BE.dto.paymentDTO.PaymentRequest;
 import com.devacademy.DevAcademy_BE.dto.paymentDTO.PaymentResponse;
+import com.devacademy.DevAcademy_BE.entity.CourseEntity;
+import com.devacademy.DevAcademy_BE.entity.CoursePayEntity;
+import com.devacademy.DevAcademy_BE.entity.CourseRegisterEntity;
+import com.devacademy.DevAcademy_BE.entity.UserEntity;
+import com.devacademy.DevAcademy_BE.enums.PayStatus;
+import com.devacademy.DevAcademy_BE.enums.PayType;
+import com.devacademy.DevAcademy_BE.enums.RegisterStatus;
+import com.devacademy.DevAcademy_BE.enums.RegisterType;
+import com.devacademy.DevAcademy_BE.repository.CoursePayRepository;
+import com.devacademy.DevAcademy_BE.repository.CourseRegisterRepository;
+import com.devacademy.DevAcademy_BE.service.MailService;
 import com.devacademy.DevAcademy_BE.service.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -23,9 +36,12 @@ import java.util.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
-public class VNPayServiceImpl implements VNPayService {
+public class PaymentServiceImpl implements VNPayService {
 
     VNPayConfig vnPayConfig;
+    CoursePayRepository coursePayRepository;
+    CourseRegisterRepository courseRegisterRepository;
+    MailService mailService;
 
     @Override
     public PaymentResponse createPaymentUrl(PaymentRequest paymentRequest, HttpServletRequest request) {
@@ -133,12 +149,19 @@ public class VNPayServiceImpl implements VNPayService {
     }
 
     @Override
-    public Map<String, Object> processPaymentReturn(HttpServletRequest request) {
+    public Map<String, Object> processPaymentReturn(HttpServletRequest request,
+                                                    Authentication authentication,
+                                                    Long courseId) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
         Map<String, String> vnpParams = new HashMap<>();
         Map<String, String[]> fields = request.getParameterMap();
 
         for (Map.Entry<String, String[]> entry : fields.entrySet()) {
-            vnpParams.put(entry.getKey(), entry.getValue()[0]);
+            String key = entry.getKey();
+            if(!"courseId".equals(key)){
+                vnpParams.put(entry.getKey(), entry.getValue()[0]);
+            }
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -146,6 +169,7 @@ public class VNPayServiceImpl implements VNPayService {
         if (!validateReturnData(vnpParams)) {
             result.put("success", false);
             result.put("message", "Chữ ký không hợp lệ");
+            savePaymentRecord(user, courseId, false, vnpParams);
             return result;
         }
 
@@ -154,10 +178,26 @@ public class VNPayServiceImpl implements VNPayService {
         if ("00".equals(responseCode)) {
             result.put("success", true);
             result.put("message", "Thanh toán thành công");
+
+            savePaymentRecord(user, courseId, true, vnpParams);
+            createCourseRegistration(user, courseId);
+            try {
+                mailService.buyCourseMail(
+                        user.getFullName(),
+                        vnpParams.get("vnp_OrderInfo").replace("Thanh toán khóa học: ", ""),
+                        user.getEmail(),
+                        "Mua khóa học thành công",
+                        "Cảm ơn bạn đã mua khóa học. Chúc bạn học tập tốt!",
+                        "Thanh toán thành công"
+                );
+            } catch (Exception e) {
+                log.error("Error sending email confirmation", e);
+            }
         } else {
             result.put("success", false);
             result.put("message", "Thanh toán thất bại");
             result.put("responseCode", responseCode);
+            savePaymentRecord(user, courseId, false, vnpParams);
         }
 
         return result;
@@ -191,5 +231,38 @@ public class VNPayServiceImpl implements VNPayService {
 
     private String generateTxnRef(Long courseId) {
         return String.valueOf(System.currentTimeMillis() + courseId);
+    }
+
+    private void savePaymentRecord(UserEntity user, Long courseId, boolean isSuccessful, Map<String, String> vnpParams) {
+        try {
+            CoursePayEntity paymentRecord = CoursePayEntity.builder()
+                    .userEntity(user)
+                    .courseEntity(CourseEntity.builder().id(courseId).build())
+                    .price(new BigDecimal(Long.parseLong(vnpParams.get("vnp_Amount")) / 100))
+                    .method(PayType.VNPAY)
+                    .status(isSuccessful ? PayStatus.SUCCESSFUL : PayStatus.FAILED)
+                    .isDeleted(false)
+                    .build();
+
+            coursePayRepository.save(paymentRecord);
+        } catch (Exception e) {
+            log.error("Error saving payment record", e);
+        }
+    }
+
+    private void createCourseRegistration(UserEntity user, Long courseId) {
+        try {
+            CourseRegisterEntity registration = CourseRegisterEntity.builder()
+                    .userEntity(user)
+                    .courseEntity(CourseEntity.builder().id(courseId).build())
+                    .registerType(RegisterType.BUY)
+                    .status(RegisterStatus.CONFIRMED)
+                    .isDeleted(false)
+                    .build();
+
+            courseRegisterRepository.save(registration);
+        } catch (Exception e) {
+            log.error("Error creating course registration", e);
+        }
     }
 }
