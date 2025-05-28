@@ -1,10 +1,12 @@
-package com.devacademy.DevAcademy_BE.service;
+package com.devacademy.DevAcademy_BE.service.queue;
 
 import com.devacademy.DevAcademy_BE.dto.UserRegistrationTask;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
 import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
+import com.devacademy.DevAcademy_BE.service.MailService;
+import com.devacademy.DevAcademy_BE.service.cloudinary.CloudinaryService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.AccessLevel;

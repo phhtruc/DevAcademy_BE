@@ -1,0 +1,31 @@
+package com.devacademy.DevAcademy_BE.controller;
+
+import com.devacademy.DevAcademy_BE.dto.paymentDTO.PaymentRequest;
+import com.devacademy.DevAcademy_BE.service.VNPayService;
+import com.devacademy.DevAcademy_BE.util.JsonResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/payments")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class PaymentController {
+
+    VNPayService vnPayService;
+
+    @PostMapping("/create-payment-url")
+    public ResponseEntity<?> createPaymentUrl(@RequestBody PaymentRequest paymentRequest,
+                                              HttpServletRequest request) {
+        return JsonResponse.ok(vnPayService.createPaymentUrl(paymentRequest, request));
+    }
+
+    @GetMapping("/payment-return")
+    public ResponseEntity<?> paymentReturn(HttpServletRequest request) {
+        return JsonResponse.ok(vnPayService.processPaymentReturn(request));
+    }
+}

@@ -59,3 +59,13 @@ cloudinary:
   api_key: 378291597432836
   api_secret: 9AuvGB1tA5cF0juYBQ5jqbo3Xwg
 
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+  public-key: ${STRIPE_PUBLIC_KEY}
+
+vnpay:
+  terminal-id: ${VN_PAY_TERMINAL_ID}
+  secret-key: ${VN_PAY_SECRET_KEY}
+  payment-url: ${VN_PAY_PAYMENT_URL}
+  return-url: ${VN_PAY_RETURN_URL}
+

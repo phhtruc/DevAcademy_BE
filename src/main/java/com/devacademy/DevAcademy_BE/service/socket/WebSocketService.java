@@ -1,4 +1,4 @@
-package com.devacademy.DevAcademy_BE.service;
+package com.devacademy.DevAcademy_BE.service.socket;
 
 import com.devacademy.DevAcademy_BE.dto.VideoStatusResponse;
 import lombok.RequiredArgsConstructor;

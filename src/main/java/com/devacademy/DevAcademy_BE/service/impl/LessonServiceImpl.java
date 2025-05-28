@@ -16,7 +16,7 @@ import com.devacademy.DevAcademy_BE.repository.ChapterRepository;
 import com.devacademy.DevAcademy_BE.repository.LessonRepository;
 import com.devacademy.DevAcademy_BE.repository.specification.LessonSpecification;
 import com.devacademy.DevAcademy_BE.service.LessonService;
-import com.devacademy.DevAcademy_BE.service.VideoUploadQueueService;
+import com.devacademy.DevAcademy_BE.service.queue.VideoUploadQueueService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

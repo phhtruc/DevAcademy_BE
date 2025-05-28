@@ -11,7 +11,7 @@ import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
 import com.devacademy.DevAcademy_BE.service.AuthenticationService;
 import com.devacademy.DevAcademy_BE.service.JwtService;
-import com.devacademy.DevAcademy_BE.service.TokenService;
+import com.devacademy.DevAcademy_BE.service.token.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
