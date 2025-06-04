@@ -24,7 +24,7 @@ public interface CourseService {
 
     void deleteCourse(Long id);
 
-    PageResponse<?> getCoursesByIdUser(int page, int pageSize, UUID id);
+    PageResponse<?> getCoursesByIdUser(int page, int pageSize, Authentication authentication);
 
     PageResponse<?> getAllCourseForUser(int page, int pageSize, Authentication authentication);
 

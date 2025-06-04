@@ -41,7 +41,8 @@ public class SecurityConfig {
                                 "/api/v1/courses/{id}",
                                 "api/v1/courses/{id}/chapters",
                                 "/api/v1/chapters/{idChapter}/lessons",
-                                "/api/v1/categories")
+                                "/api/v1/categories",
+                                "/api/v1/users/courses")
                         .permitAll()
                         .requestMatchers("/api/v1/users/**").hasAuthority(RoleType.ADMIN.name())
                         .requestMatchers("/api/v1/courses/**").hasAnyAuthority(RoleType.TEACHER.name())

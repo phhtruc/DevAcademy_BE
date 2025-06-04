@@ -74,7 +74,8 @@ public class CourseServiceImpl implements CourseService {
         if(auth != null && auth.getPrincipal() instanceof UserEntity userEntity) {
             courseMap.setIsPurchased(checkCourseIsPurchased(userEntity.getId(), id));
             if( courseMap.getIsPurchased() ) {
-                courseMap.setDuration(Objects.requireNonNull(getCourseDaysRemaining(userEntity.getId(), id, userEntity)).toString());
+                courseMap.setDuration(Objects.requireNonNull(getCourseDaysRemaining(userEntity.getId(), id, userEntity))
+                        .toString());
             }
         }
 
@@ -121,11 +122,13 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public PageResponse<?> getCoursesByIdUser(int page, int pageSize, UUID id) {
-        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
-        Page<CourseEntity> course = courseRepository.findAllByUserId(pageable, id);
+    public PageResponse<?> getCoursesByIdUser(int page, int pageSize, Authentication authentication) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
 
-        return getPageResponse(page, pageSize, course, id);
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
+        Page<CourseEntity> course = courseRepository.findAllByUserId(pageable, user.getId());
+
+        return getPageResponse(page, pageSize, course, user);
     }
 
     @Override
@@ -137,7 +140,7 @@ public class CourseServiceImpl implements CourseService {
             return getPageResponse(page, pageSize, course, null);
         }
 
-        return getPageResponse(page, pageSize, course, userEntity.getId());
+        return getPageResponse(page, pageSize, course, userEntity);
     }
 
     @Override
@@ -204,7 +207,7 @@ public class CourseServiceImpl implements CourseService {
         courseHasCategoryRepository.save(relation);
     }
 
-    private PageResponse<?> getPageResponse(int page, int pageSize, Page<CourseEntity> course, UUID userId) {
+    private PageResponse<?> getPageResponse(int page, int pageSize, Page<CourseEntity> course, UserEntity user) {
         List<CourseResponseDTO> list = course.stream()
                 .map(courseEntity -> {
                     var listTechStack = getTechStacksByCourse(courseEntity);
@@ -212,8 +215,15 @@ public class CourseServiceImpl implements CourseService {
                     var courseMap = courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
                     courseMap.setCategory(getCategory(courseEntity));
                     courseMap.setLessonCount(lessonCount);
-                    if (userId != null) {
-                        courseMap.setIsPurchased(checkCourseIsPurchased(userId, courseEntity.getId()));
+                    if (user != null) {
+                        courseMap.setIsPurchased(checkCourseIsPurchased(user.getId(), courseEntity.getId()));
+                        if (courseMap.getIsPurchased()) {
+                            try {
+                                courseMap.setDuration(Objects.requireNonNull(
+                                        getCourseDaysRemaining(user.getId(), courseEntity.getId(), user)).toString());
+                            } catch (MessagingException ignored) {
+                            }
+                        }
                     } else {
                         courseMap.setIsPurchased(false);
                     }

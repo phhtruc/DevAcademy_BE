@@ -1,7 +1,6 @@
 package com.devacademy.DevAcademy_BE.controller;
 
 import com.devacademy.DevAcademy_BE.dto.userDTO.AdminRequestDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
 import com.devacademy.DevAcademy_BE.service.CourseService;
@@ -14,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,12 +46,11 @@ public class UserController {
         return JsonResponse.ok(userService.addUser(request, avatar));
     }
 
-    @PreAuthorize("hasAuthority('USER')")
-    @GetMapping("/{id}/courses")
+    @GetMapping("/courses")
     public ResponseEntity<?> getCoursesByIdUser(@RequestParam(required = false, defaultValue = "1") int page,
                                                 @RequestParam(required = false, defaultValue = "100") int pageSize,
-                                                @PathVariable UUID id) {
-        return JsonResponse.ok(courseService.getCoursesByIdUser(page, pageSize, id));
+                                                Authentication authentication) {
+        return JsonResponse.ok(courseService.getCoursesByIdUser(page, pageSize, authentication));
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
