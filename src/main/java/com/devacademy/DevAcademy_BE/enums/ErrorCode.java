@@ -89,6 +89,11 @@ public enum ErrorCode {
     COMMENT_NOT_EXISTED(240001, "Comment not existed", HttpStatus.NOT_FOUND),
     DELETE_ERROR(240001, "You are not authorized to delete this comment", HttpStatus.NOT_FOUND),
 
+    // payment 2500**
+    INVALID_PAYMENT_DATA(250000, "Invalid payment data", HttpStatus.BAD_REQUEST),
+    PAYMENT_FAILED(250001, "Payment failed", HttpStatus.BAD_REQUEST)
+
+
     ;
 
     Integer code;

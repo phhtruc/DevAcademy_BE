@@ -1,9 +1,11 @@
-package com.devacademy.DevAcademy_BE.service;
+package com.devacademy.DevAcademy_BE.service.queue;
 
 import com.devacademy.DevAcademy_BE.dto.VideoStatusResponse;
 import com.devacademy.DevAcademy_BE.dto.VideoUploadTask;
 import com.devacademy.DevAcademy_BE.enums.VideoUploadStatus;
 import com.devacademy.DevAcademy_BE.repository.LessonRepository;
+import com.devacademy.DevAcademy_BE.service.cloudinary.CloudinaryService;
+import com.devacademy.DevAcademy_BE.service.socket.WebSocketService;
 import jakarta.annotation.PreDestroy;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;

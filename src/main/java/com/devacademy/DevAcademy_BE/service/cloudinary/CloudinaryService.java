@@ -1,4 +1,4 @@
-package com.devacademy.DevAcademy_BE.service;
+package com.devacademy.DevAcademy_BE.service.cloudinary;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

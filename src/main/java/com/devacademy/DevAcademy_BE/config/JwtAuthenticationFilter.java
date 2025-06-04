@@ -3,7 +3,7 @@ package com.devacademy.DevAcademy_BE.config;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.enums.TokenType;
 import com.devacademy.DevAcademy_BE.service.JwtService;
-import com.devacademy.DevAcademy_BE.service.TokenService;
+import com.devacademy.DevAcademy_BE.service.token.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

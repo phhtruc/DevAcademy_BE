@@ -1,4 +1,4 @@
-package com.devacademy.DevAcademy_BE.service;
+package com.devacademy.DevAcademy_BE.service.token;
 
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import lombok.AccessLevel;
