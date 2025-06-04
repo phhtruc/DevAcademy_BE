@@ -6,6 +6,7 @@ import com.devacademy.DevAcademy_BE.dto.VideoStatusResponse;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonSearchDTO;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Service
 public interface LessonService {
-    PageResponse<?> getLessonsByIdChapter(int page, int pageSize, Long idChapter);
+    PageResponse<?> getLessonsByIdChapter(int page, int pageSize, Long idChapter, Long idCourse, Authentication auth);
 
     LessonResponseDTO getLessonById(Long id);
 

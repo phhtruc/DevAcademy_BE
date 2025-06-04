@@ -8,11 +8,14 @@ import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonSearchDTO;
 import com.devacademy.DevAcademy_BE.entity.LessonEntity;
+import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
+import com.devacademy.DevAcademy_BE.enums.RegisterType;
 import com.devacademy.DevAcademy_BE.enums.TypeLesson;
 import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.mapper.LessonMapper;
 import com.devacademy.DevAcademy_BE.repository.ChapterRepository;
+import com.devacademy.DevAcademy_BE.repository.CourseRegisterRepository;
 import com.devacademy.DevAcademy_BE.repository.LessonRepository;
 import com.devacademy.DevAcademy_BE.repository.specification.LessonSpecification;
 import com.devacademy.DevAcademy_BE.service.LessonService;
@@ -27,10 +30,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,12 +50,21 @@ public class LessonServiceImpl implements LessonService {
     VideoUploadQueueService videoUploadQueueService;
     RedisTemplate<String, VideoStatusResponse> redisTemplate;
     static String REDIS_VIDEO_STATUS_KEY = "video:status:";
+    CourseRegisterRepository courseRegisterRepository;
 
     @Override
-    public PageResponse<?> getLessonsByIdChapter(int page, int pageSize, Long idChapter) {
+    public PageResponse<?> getLessonsByIdChapter(int page, int pageSize, Long idChapter, Long idCourse,
+                                                 Authentication auth) {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize,
                 Sort.by("lessonOrder"));
         Page<LessonEntity> course = lessonRepository.findAllByChapterEntityId(idChapter, pageable);
+
+        if(auth != null && auth.getPrincipal() instanceof UserEntity userEntity){
+            if(checkCourseIsPurchased(userEntity.getId(), idCourse)){
+                course.forEach(lesson -> lesson.setIsPublic(true));
+            }
+        }
+
         List<LessonResponseDTO> list = course.map(lessonMapper::toLessonResponseDTO)
                 .stream().collect(Collectors.toList());
         return PageResponse.builder()
@@ -162,6 +176,12 @@ public class LessonServiceImpl implements LessonService {
                 .totalPage(course.getTotalPages())
                 .items(list)
                 .build();
+    }
+
+    private boolean checkCourseIsPurchased(UUID userId, Long courseId) {
+        return courseRegisterRepository
+                .findByUserEntityIdAndCourseEntityIdAndRegisterType(userId, courseId, RegisterType.BUY)
+                .isPresent();
     }
 
 }
