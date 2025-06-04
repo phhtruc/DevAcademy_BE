@@ -38,6 +38,11 @@ spring:
           auth: true
           starttls:
             enable: true
+  thymeleaf:
+    encoding: UTF-8
+    template-resolver-order: 1
+    prefix: classpath:/templates/
+    suffix: .html
 #  security:
 #    oauth2:
 #      client:

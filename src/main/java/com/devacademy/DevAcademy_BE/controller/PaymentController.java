@@ -28,7 +28,8 @@ public class PaymentController {
     @GetMapping("/payment-return")
     public ResponseEntity<?> paymentReturn(HttpServletRequest request,
                                            Authentication authentication,
+                                           @RequestParam String courseName,
                                            @RequestParam Long courseId) {
-        return JsonResponse.ok(vnPayService.processPaymentReturn(request, authentication, courseId));
+        return JsonResponse.ok(vnPayService.processPaymentReturn(request, authentication, courseName, courseId));
     }
 }

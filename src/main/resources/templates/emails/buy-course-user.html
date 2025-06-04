@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo mua khóa học</title>
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 2px solid #0084ff;
+        }
+
+        .header {
+            background-color: #0084ff;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .content {
+            padding: 30px 25px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .content h2 {
+            color: #0084ff;
+            margin-top: 0;
+        }
+
+        .content p {
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #0084ff;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #999999;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+
+        .footer strong {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header">
+        <h1>Mua khóa học thành công</h1>
+    </div>
+    <div class="content">
+        <h2>Xin chào, <span th:text="${userName}">Tên người dùng</span> 👋</h2>
+        <p>
+            Cảm ơn bạn đã mua khóa học: <strong th:text="${courseName}">Tên khóa học</strong>. Chúng tôi rất vui được đồng hành cùng bạn trên chặng đường học tập sắp tới.
+        </p>
+        <p>
+            Bạn có thể nhấn vào nút bên dưới để bắt đầu học ngay:
+        </p>
+        <a th:href="@{http://localhost:5173/khoa-hoc/{id}(id=${courseId})}" class="button">👉 Truy cập khóa học</a>
+    </div>
+    <div class="footer">
+        <p>Cảm ơn bạn đã tin tưởng và lựa chọn nền tảng của chúng tôi.</p>
+        <p><strong>DevAcademy</strong>, An Khê, Thanh Khê, Đà Nẵng</p>
+    </div>
+</div>
+</body>
+</html>

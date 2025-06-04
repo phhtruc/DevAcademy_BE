@@ -11,5 +11,6 @@ import java.util.Map;
 @Service
 public interface VNPayService {
     PaymentResponse createPaymentUrl(PaymentRequest paymentRequest, HttpServletRequest request);
-    Map<String, Object> processPaymentReturn(HttpServletRequest request, Authentication authentication, Long courseId);
+    Map<String, Object> processPaymentReturn(HttpServletRequest request, Authentication authentication,
+                                             String courseName, Long courseId);
 }

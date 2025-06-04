@@ -151,6 +151,7 @@ public class PaymentServiceImpl implements VNPayService {
     @Override
     public Map<String, Object> processPaymentReturn(HttpServletRequest request,
                                                     Authentication authentication,
+                                                    String courseName,
                                                     Long courseId) {
         UserEntity user = (UserEntity) authentication.getPrincipal();
 
@@ -159,8 +160,8 @@ public class PaymentServiceImpl implements VNPayService {
 
         for (Map.Entry<String, String[]> entry : fields.entrySet()) {
             String key = entry.getKey();
-            if(!"courseId".equals(key)){
-                vnpParams.put(entry.getKey(), entry.getValue()[0]);
+            if (!"courseId".equals(key) && !"courseName".equals(key)) {
+                vnpParams.put(key, entry.getValue()[0]);
             }
         }
 
@@ -184,7 +185,8 @@ public class PaymentServiceImpl implements VNPayService {
             try {
                 mailService.buyCourseMail(
                         user.getFullName(),
-                        vnpParams.get("vnp_OrderInfo").replace("Thanh toán khóa học: ", ""),
+                        courseId,
+                        courseName,
                         user.getEmail(),
                         "Mua khóa học thành công",
                         "Cảm ơn bạn đã mua khóa học. Chúc bạn học tập tốt!",
