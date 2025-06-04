@@ -27,14 +27,6 @@ public class GmailServiceImpl implements MailService {
     static String SPRING_MAIL_USERNAME = System.getenv("SPRING_MAIL_USERNAME");
 
     @Override
-    public void trialCourseMail(String userName, String courseName, String toEmail, String subject, String title,
-                                String description) throws MessagingException {
-        Context context = createContext(userName, courseName, null);
-        String htmlContent = templateEngine.process("emails/trial-course", context);
-        sendHtmlEmail(toEmail, subject, htmlContent);
-    }
-
-    @Override
     public void setUpAccount(String userName, String resetLink, String toEmail, String subject)
             throws MessagingException {
         Context context = createContextForSetupAccount(userName, resetLink);
@@ -43,10 +35,18 @@ public class GmailServiceImpl implements MailService {
     }
 
     @Override
-    public void buyCourseMail(String userName, Long courseId, String courseName, String toEmail, String subject, String title,
-                              String description) throws MessagingException {
+    public void buyCourseMail(String userName, Long courseId, String courseName, String toEmail, String subject)
+            throws MessagingException {
         Context context = createContext(userName, courseName, courseId);
         String htmlContent = templateEngine.process("emails/buy-course-user", context);
+        sendHtmlEmail(toEmail, subject, htmlContent);
+    }
+
+    @Override
+    public void durationCourse(String userName, String expiredDate, String courseName, String toEmail, String subject,
+                               Long courseId) throws MessagingException {
+        Context context = createContextDuration(userName, courseName, expiredDate, courseId);
+        String htmlContent = templateEngine.process("emails/duration-course", context);
         sendHtmlEmail(toEmail, subject, htmlContent);
     }
 
@@ -78,6 +78,15 @@ public class GmailServiceImpl implements MailService {
         Context context = new Context(Locale.getDefault());
         context.setVariable("userName", userName);
         context.setVariable("resetLink", resetLink);
+        return context;
+    }
+
+    private Context createContextDuration(String userName, String courseName, String expiredDate, Long courseId) {
+        Context context = new Context(Locale.getDefault());
+        context.setVariable("userName", userName);
+        context.setVariable("courseName", courseName);
+        context.setVariable("expiredDate", expiredDate);
+        context.setVariable("courseId", courseId);
         return context;
     }
 }

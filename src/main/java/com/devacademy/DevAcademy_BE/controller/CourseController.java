@@ -5,12 +5,13 @@ import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearchDTO;
 import com.devacademy.DevAcademy_BE.service.ChapterService;
 import com.devacademy.DevAcademy_BE.service.CourseService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,13 +34,14 @@ public class CourseController {
 
     @GetMapping("/user")
     public ResponseEntity<?> getAllCourseForUser(@RequestParam(required = false, defaultValue = "1") int page,
-                                                 @RequestParam(required = false, defaultValue = "10") int pageSize) {
-        return JsonResponse.ok(courseService.getAllCourseForUser(page, pageSize));
+                                                 @RequestParam(required = false, defaultValue = "10") int pageSize,
+                                                 Authentication authentication) {
+        return JsonResponse.ok(courseService.getAllCourseForUser(page, pageSize, authentication));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCourseById(@PathVariable Long id) {
-        return JsonResponse.ok(courseService.getCourseById(id));
+    public ResponseEntity<?> getCourseById(@PathVariable Long id, Authentication auth) throws MessagingException {
+        return JsonResponse.ok(courseService.getCourseById(id, auth));
     }
 
     @GetMapping("/{id}/chapters")

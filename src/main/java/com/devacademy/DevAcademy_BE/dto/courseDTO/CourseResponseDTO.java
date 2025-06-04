@@ -8,6 +8,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -21,10 +23,11 @@ public class CourseResponseDTO {
     String thumbnailUrl;
     String description;
     Boolean isPublic;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    RegisterType registerType;
     List<TechStackResponseDTO> techStacks;
     CategoryResponseDTO category;
     String duration;
     Integer lessonCount;
+    Boolean isPurchased;
+    LocalDateTime modifiedDate;
+    Integer totalRegister;
 }

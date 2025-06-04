@@ -188,9 +188,7 @@ public class PaymentServiceImpl implements VNPayService {
                         courseId,
                         courseName,
                         user.getEmail(),
-                        "Mua khóa học thành công",
-                        "Cảm ơn bạn đã mua khóa học. Chúc bạn học tập tốt!",
-                        "Thanh toán thành công"
+                        "Mua khóa học thành công"
                 );
             } catch (Exception e) {
                 log.error("Error sending email confirmation", e);

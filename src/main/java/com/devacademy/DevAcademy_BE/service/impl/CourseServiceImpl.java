@@ -1,7 +1,7 @@
 package com.devacademy.DevAcademy_BE.service.impl;
 
-import com.devacademy.DevAcademy_BE.dto.categoryDTO.CategoryResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
+import com.devacademy.DevAcademy_BE.dto.categoryDTO.CategoryResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearchDTO;
@@ -13,8 +13,10 @@ import com.devacademy.DevAcademy_BE.mapper.CategoryMapper;
 import com.devacademy.DevAcademy_BE.mapper.CourseMapper;
 import com.devacademy.DevAcademy_BE.repository.*;
 import com.devacademy.DevAcademy_BE.repository.specification.CourseSpecification;
-import com.devacademy.DevAcademy_BE.service.cloudinary.CloudinaryService;
 import com.devacademy.DevAcademy_BE.service.CourseService;
+import com.devacademy.DevAcademy_BE.service.MailService;
+import com.devacademy.DevAcademy_BE.service.cloudinary.CloudinaryService;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +25,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,6 +52,7 @@ public class CourseServiceImpl implements CourseService {
     CategoryRepository categoryRepository;
     CourseHasCategoryRepository courseHasCategoryRepository;
     CategoryMapper categoryMapper;
+    MailService mailService;
 
     @Override
     public PageResponse<?> getAllCourse(int page, int size) {
@@ -55,12 +63,21 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseResponseDTO getCourseById(Long id) {
+    public CourseResponseDTO getCourseById(Long id, Authentication auth) throws MessagingException {
         var course = courseRepository.findById(id).orElseThrow(() ->
                 new ApiException(ErrorCode.COURSE_NOT_EXISTED));
         var courseMap = courseMapper.toCourseResponseDTO(course, getTechStacksByCourse(course));
         courseMap.setCategory(getCategory(course));
         courseMap.setLessonCount(getLessonCountByCourse(course.getId()));
+        courseMap.setTotalRegister(countUserBuyCourse(course.getId()));
+
+        if(auth != null && auth.getPrincipal() instanceof UserEntity userEntity) {
+            courseMap.setIsPurchased(checkCourseIsPurchased(userEntity.getId(), id));
+            if( courseMap.getIsPurchased() ) {
+                courseMap.setDuration(Objects.requireNonNull(getCourseDaysRemaining(userEntity.getId(), id, userEntity)).toString());
+            }
+        }
+
         return courseMap;
     }
 
@@ -112,10 +129,15 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public PageResponse<?> getAllCourseForUser(int page, int pageSize) {
+    public PageResponse<?> getAllCourseForUser(int page, int pageSize, Authentication authentication) {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
         Page<CourseEntity> course = courseRepository.findAllPublicCourses(pageable);
-        return getPageResponse(page, pageSize, course, null);
+
+        if(authentication == null || !(authentication.getPrincipal() instanceof UserEntity userEntity)) {
+            return getPageResponse(page, pageSize, course, null);
+        }
+
+        return getPageResponse(page, pageSize, course, userEntity.getId());
     }
 
     @Override
@@ -182,7 +204,7 @@ public class CourseServiceImpl implements CourseService {
         courseHasCategoryRepository.save(relation);
     }
 
-    private PageResponse<?> getPageResponse(int page, int pageSize, Page<CourseEntity> course, UUID id) {
+    private PageResponse<?> getPageResponse(int page, int pageSize, Page<CourseEntity> course, UUID userId) {
         List<CourseResponseDTO> list = course.stream()
                 .map(courseEntity -> {
                     var listTechStack = getTechStacksByCourse(courseEntity);
@@ -190,9 +212,10 @@ public class CourseServiceImpl implements CourseService {
                     var courseMap = courseMapper.toCourseResponseDTO(courseEntity, listTechStack);
                     courseMap.setCategory(getCategory(courseEntity));
                     courseMap.setLessonCount(lessonCount);
-                    if(id != null){
-                        courseMap.setRegisterType(getRegisterTypes(id, courseEntity));
-                        return courseMap;
+                    if (userId != null) {
+                        courseMap.setIsPurchased(checkCourseIsPurchased(userId, courseEntity.getId()));
+                    } else {
+                        courseMap.setIsPurchased(false);
                     }
                     return courseMap;
                 })
@@ -221,13 +244,6 @@ public class CourseServiceImpl implements CourseService {
                 .toList();
     }
 
-    private RegisterType getRegisterTypes(UUID id, CourseEntity course) {
-        var courseRegister = courseRegisterRepository
-                .findCourseRegisterEntitiesByCourseEntityIdAndUserEntityId(course.getId(), id)
-                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_NOT_EXISTED));
-        return courseRegister.getRegisterType();
-    }
-
     private CategoryResponseDTO getCategory(CourseEntity course) {
         var courseHasCategory = categoryRepository.findByCourseId(course.getId())
                 .orElse(null);
@@ -236,5 +252,43 @@ public class CourseServiceImpl implements CourseService {
 
     private int getLessonCountByCourse(Long courseId) {
         return courseRepository.CountLessonsByCourse(courseId);
+    }
+
+    private boolean checkCourseIsPurchased(UUID userId, Long courseId) {
+        return courseRegisterRepository
+                .findByUserEntityIdAndCourseEntityIdAndRegisterType(userId, courseId, RegisterType.BUY)
+                .isPresent();
+    }
+
+    private Integer countUserBuyCourse(Long courseId) {
+        return courseRegisterRepository.countByCourseEntityIdAndRegisterType(courseId, RegisterType.BUY);
+    }
+
+    private Integer getCourseDaysRemaining(UUID userId, Long courseId, UserEntity user) throws MessagingException {
+        CourseRegisterEntity registration = courseRegisterRepository
+                .findByUserEntityIdAndCourseEntityIdAndRegisterType(userId, courseId, RegisterType.BUY)
+                .orElse(null);
+        CourseEntity courseEntity = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ApiException(ErrorCode.COURSE_NOT_EXISTED));
+
+        if (registration == null) {
+            return null;
+        }
+        int durationInMonths = courseEntity.getDuration();
+        LocalDateTime purchaseDate = registration.getCreatedDate();
+        LocalDateTime expirationDate = purchaseDate.plusMonths(durationInMonths);
+        long daysRemaining = ChronoUnit.DAYS.between(LocalDateTime.now(), expirationDate);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String formattedDate = LocalDateTime.now().format(formatter);
+
+        if (daysRemaining <= 0) {
+            registration.setIsDeleted(true);
+            courseRegisterRepository.save(registration);
+            mailService.durationCourse(user.getFullName(), formattedDate, courseEntity.getName(),
+                    registration.getUserEntity().getEmail(), "Khoá học đã hết hạn", courseId);
+            return 0;
+        }
+
+        return (int) daysRemaining;
     }
 }
