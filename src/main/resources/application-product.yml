@@ -5,9 +5,9 @@ spring:
     activate:
       on-profile: product
   datasource:
-    url: jdbc:mysql://localhost:3306/techlearn
-    username: root
-    password: root
+    url: jdbc:mysql://db-mysql-dev-academy-do-user-23091549-0.g.db.ondigitalocean.com:25060/DevAcademy
+    username: doadmin
+    password: AVNS_jHnm_HtmlW0Sft5LT4Q
   jpa:
     hibernate:
       ddl-auto: validate
@@ -19,3 +19,45 @@ spring:
     locations: classpath:/db/migration
     baseline-on-migrate: true
     baseline-version: 0
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: mockprojectgroup6@gmail.com
+    password: qjod imqb pyng jsps
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  thymeleaf:
+    encoding: UTF-8
+    template-resolver-order: 1
+    prefix: classpath:/templates/
+    suffix: .html
+
+jwt:
+  secret-key : 89dd3a965fddb1460b64c074c928ee19f6697a168bc5ec72c336fb6df64289c4
+  refresh-key : CZBpcWmn8Y6LLxLEFyUBj5battfY7nh+neuTbofnsM4=
+  expriration : 900000  # 15 minutes
+  refresh-token :
+    expriration : 604800000 # 7days
+
+cloudinary:
+  cloud_name: dn2m3s9k0
+  api_key: 378291597432836
+  api_secret: 9AuvGB1tA5cF0juYBQ5jqbo3Xwg
+
+vnpay:
+  terminal-id: A9R9W8XL
+  secret-key: LBWQJHFZXJ7RMX3DKOQ4VMFFBZRLBD0B
+  payment-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+  return-url: http://localhost:5173/thanh-toan
