@@ -5,12 +5,12 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: jdbc:mysql://localhost:3306/DevAcademy
-    username: root
-    password: 123456
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -21,5 +21,56 @@ spring:
     baseline-version: 0
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 500MB
+      max-request-size: 500MB
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  thymeleaf:
+    encoding: UTF-8
+    template-resolver-order: 1
+    prefix: classpath:/templates/
+    suffix: .html
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id:
+#            client-secret:
+#            redirect-uri:
+
+jwt:
+  secret-key : 89dd3a965fddb1460b64c074c928ee19f6697a168bc5ec72c336fb6df64289c4
+  refresh-key : CZBpcWmn8Y6LLxLEFyUBj5battfY7nh+neuTbofnsM4=
+  expriration : 900000  # 15 minutes
+  refresh-token :
+    expriration : 604800000 # 7days
+
+cloudinary:
+  cloud_name: dn2m3s9k0
+  api_key: 378291597432836
+  api_secret: 9AuvGB1tA5cF0juYBQ5jqbo3Xwg
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+  public-key: ${STRIPE_PUBLIC_KEY}
+
+vnpay:
+  terminal-id: ${VN_PAY_TERMINAL_ID}
+  secret-key: ${VN_PAY_SECRET_KEY}
+  payment-url: ${VN_PAY_PAYMENT_URL}
+  return-url: ${VN_PAY_RETURN_URL}
+

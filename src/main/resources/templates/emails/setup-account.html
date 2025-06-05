@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiết Lập Tài Khoản</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border: 0.5px solid black;
+        }
+
+        .header {
+            background-color: #007bff;
+            padding: 10px;
+            text-align: center;
+            color: #ffffff;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .content {
+            padding: 20px;
+            text-align: left;
+            color: #333333;
+        }
+
+        .content h2 {
+            color: #007bff;
+        }
+
+        .content p {
+            line-height: 1.6;
+        }
+
+        .button {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .button a {
+            text-decoration: none;
+            color: #ffffff;
+            background-color: #007bff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Thiết Lập Tài Khoản</h1>
+    </div>
+    <div class="content">
+        <h2>Xin chào, <span th:text="${userName}">Người dùng</span>!</h2>
+        <p>
+            Chào mừng bạn đã đến với DevAcademy! Để bắt đầu trải nghiệm học tập, vui lòng thiết lập mật khẩu tài khoản
+            của bạn bằng cách nhấn nút bên dưới. Liên kết chỉ có hiệu lực trong vòng 24 giờ.
+        </p>
+        <div class="button">
+            <a th:href="${resetLink}" target="_blank">Thiết Lập Mật Khẩu</a>
+        </div>
+        <p>Nếu nút bấm không hoạt động, vui lòng sao chép và dán liên kết bên dưới vào trình duyệt của bạn:</p>
+        <p th:text="${resetLink}" style="word-break: break-all;">[Liên kết]</p>
+    </div>
+    <div class="footer">
+        <p>Cảm ơn bạn đã tin tưởng và lựa chọn DevAcademy.</p>
+        <p>DevAcademy, 6 Trần Phú, Thạch Thang, Hải Châu, Đà Nẵng</p>
+    </div>
+</div>
+</body>
+</html>

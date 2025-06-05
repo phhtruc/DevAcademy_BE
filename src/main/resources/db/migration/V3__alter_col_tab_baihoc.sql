@@ -1,0 +1,1 @@
+ALTER TABLE baihoc MODIFY COLUMN video_url LONGTEXT;
