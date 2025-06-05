@@ -19,17 +19,17 @@ public abstract class BaseEntity {
 
     @Column(name="nguoiTao",updatable = false)
     @CreatedBy
-    private String nguoiTao;
+    private String createdBy;
 
     @Column(name="ngayTao", updatable = false)
     @CreationTimestamp
-    private LocalDateTime ngayTao;
+    private LocalDateTime createdDate;
 
     @Column(name="ngaySua")
     @UpdateTimestamp
-    private LocalDateTime ngaySua;
+    private LocalDateTime modifiedDate;
 
     @Column(name="nguoiSua")
     @LastModifiedBy
-    private String nguoiSua;
+    private String modifiedBy;
 }
