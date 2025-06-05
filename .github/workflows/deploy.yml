@@ -1,0 +1,82 @@
+name: Spring Boot CI/CD Pipeline
+
+# Define triggers for the pipeline - when code is pushed to main branch
+on:
+  push:
+    branches:
+      - main
+
+# Define jobs to be executed
+jobs:
+  # Job 1: Build and test the application
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        # Use the checkout action to copy code from repository to the Ubuntu runner
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        # Set up Java Development Kit for building the Spring Boot application
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Login to Docker Hub
+        # Login to Docker Hub using stored secrets
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        # Build the Docker image using the Dockerfile and push it to Docker Hub
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/dev-academy:${{ github.sha }}
+
+  # Job 2: Deploy the application to production server
+  deploy:
+    # This job runs after build_and_test job completes successfully
+    needs: build_and_test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to server
+        # Use SSH to deploy the Docker image to the production server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Pull the latest image that was pushed to Docker Hub
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/dev-academy:${{ github.sha }}
+
+            # Stop and remove the existing container if it exists
+            docker stop dev-academy-container || true
+            docker rm dev-academy-container || true
+
+            # Run a new container with the updated image
+            docker run -d --name dev-academy-container \
+              -p 8002:8002 \
+              -e SPRING_PROFILES_ACTIVE=product \
+              -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e SPRING_MAIL_USERNAME=${{ secrets.SPRING_MAIL_USERNAME }} \
+              -e SPRING_MAIL_PASSWORD=${{ secrets.SPRING_MAIL_PASSWORD }} \
+              -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
+              -e STRIPE_PUBLIC_KEY=${{ secrets.STRIPE_PUBLIC_KEY }} \
+              -e VN_PAY_TERMINAL_ID=${{ secrets.VN_PAY_TERMINAL_ID }} \
+              -e VN_PAY_SECRET_KEY=${{ secrets.VN_PAY_SECRET_KEY }} \
+              -e VN_PAY_PAYMENT_URL=${{ secrets.VN_PAY_PAYMENT_URL }} \
+              -e VN_PAY_RETURN_URL=${{ secrets.VN_PAY_RETURN_URL }} \
+              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              -e JWT_REFRESH_KEY=${{ secrets.JWT_REFRESH_KEY }} \
+              ${{ secrets.DOCKERHUB_USERNAME }}/dev-academy:${{ github.sha }}
