@@ -64,14 +64,27 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Pull the latest image that was pushed to Docker Hub
+          # Pull the latest image that was pushed to Docker Hub
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/dev-academy:${{ github.sha }}
-  
-            # Stop and remove the existing container if it exists
+            
+          # Create docker network if it doesn't exist
+            docker network inspect app-network >/dev/null 2>&1 || docker network create app-network      
+      
+          # Stop and remove the existing container if it exists
             docker stop dev-academy-container || true
             docker rm dev-academy-container || true
+            docker stop dev-academy-redis || true
+            docker rm dev-academy-redis || true
+            
+          # Start Redis container
+            docker run -d --name dev-academy-redis \
+            --network app-network \
+            -p 6379:6379 \
+            -v redis-data:/data \
+            --restart always \
+            redis:alpine
   
-            # Run a new container with the updated image - FIXED COMMAND
+          # Run a new container with the updated image - FIXED COMMAND
             docker run -d --name dev-academy-container \
               -p 8002:8002 \
               -e SPRING_PROFILES_ACTIVE=product \
@@ -88,6 +101,9 @@ jobs:
               -e VN_PAY_RETURN_URL="${{ secrets.VN_PAY_RETURN_URL }}" \
               -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
               -e JWT_REFRESH_KEY="${{ secrets.JWT_REFRESH_KEY }}" \
+              -e SPRING_DATA_REDIS_HOST=dev-academy-redis \
+              -e SPRING_DATA_REDIS_PORT=6379 \
+              --restart always \
               ${{ secrets.DOCKERHUB_USERNAME }}/dev-academy:${{ github.sha }}
             
             echo "=== Docker container status ==="
@@ -95,3 +111,14 @@ jobs:
 
             echo "=== Logs ==="
             docker logs dev-academy-container || echo "No logs found"
+                    
+            echo "=== Application Logs ==="
+            docker logs dev-academy-container || echo "No application logs found"
+                    
+            echo "=== Redis Logs ==="
+            docker logs dev-academy-redis || echo "No Redis logs found"
+            
+            # Simple health check
+            sleep 15
+            echo "=== Checking if application is responding ==="
+            curl -s -o /dev/null -w "%{http_code}" localhost:8002/actuator/health || echo "Health check failed"
