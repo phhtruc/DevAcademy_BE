@@ -64,19 +64,19 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-          # Pull the latest image that was pushed to Docker Hub
+            # Pull the latest image that was pushed to Docker Hub
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/dev-academy:${{ github.sha }}
             
-          # Create docker network if it doesn't exist
+            # Create docker network if it doesn't exist
             docker network inspect app-network >/dev/null 2>&1 || docker network create app-network      
       
-          # Stop and remove the existing container if it exists
+            # Stop and remove the existing container if it exists
             docker stop dev-academy-container || true
             docker rm dev-academy-container || true
             docker stop dev-academy-redis || true
             docker rm dev-academy-redis || true
             
-          # Start Redis container
+            # Start Redis container
             docker run -d --name dev-academy-redis \
             --network app-network \
             -p 6379:6379 \
@@ -84,7 +84,7 @@ jobs:
             --restart always \
             redis:alpine
   
-          # Run a new container with the updated image - FIXED COMMAND
+            # Run a new container with the updated image - FIXED COMMAND
             docker run -d --name dev-academy-container \
               -p 8002:8002 \
               -e SPRING_PROFILES_ACTIVE=product \
