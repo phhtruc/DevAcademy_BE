@@ -84,8 +84,9 @@ jobs:
             --restart always \
             redis:alpine
   
-            # Run a new container with the updated image - FIXED COMMAND
+            # Start Spring Boot container
             docker run -d --name dev-academy-container \
+              --network app-network \
               -p 8002:8002 \
               -e SPRING_PROFILES_ACTIVE=product \
               -e SPRING_DATASOURCE_URL="${{ secrets.DB_URL }}" \
