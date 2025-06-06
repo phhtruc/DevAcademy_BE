@@ -42,13 +42,11 @@ jobs:
 
   # Job 2: Deploy the application to production server
   deploy:
-    # This job runs after build_and_test job completes successfully
     needs: build_and_test
     runs-on: ubuntu-latest
 
     steps:
       - name: Deploy to server
-        # Use SSH to deploy the Docker image to the production server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -57,26 +55,32 @@ jobs:
           script: |
             # Pull the latest image that was pushed to Docker Hub
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/dev-academy:${{ github.sha }}
-
+  
             # Stop and remove the existing container if it exists
             docker stop dev-academy-container || true
             docker rm dev-academy-container || true
-
-            # Run a new container with the updated image
+  
+            # Run a new container with the updated image - FIXED COMMAND
             docker run -d --name dev-academy-container \
               -p 8002:8002 \
               -e SPRING_PROFILES_ACTIVE=product \
-              -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
-              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
-              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e SPRING_MAIL_USERNAME=${{ secrets.SPRING_MAIL_USERNAME }} \
-              -e SPRING_MAIL_PASSWORD=${{ secrets.SPRING_MAIL_PASSWORD }} \
-              -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
-              -e STRIPE_PUBLIC_KEY=${{ secrets.STRIPE_PUBLIC_KEY }} \
-              -e VN_PAY_TERMINAL_ID=${{ secrets.VN_PAY_TERMINAL_ID }} \
-              -e VN_PAY_SECRET_KEY=${{ secrets.VN_PAY_SECRET_KEY }} \
-              -e VN_PAY_PAYMENT_URL=${{ secrets.VN_PAY_PAYMENT_URL }} \
-              -e VN_PAY_RETURN_URL=${{ secrets.VN_PAY_RETURN_URL }} \
-              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
-              -e JWT_REFRESH_KEY=${{ secrets.JWT_REFRESH_KEY }} \
+              -e SPRING_DATASOURCE_URL="${{ secrets.DB_URL }}" \
+              -e SPRING_DATASOURCE_USERNAME="${{ secrets.DB_USERNAME }}" \
+              -e SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -e SPRING_MAIL_USERNAME="${{ secrets.SPRING_MAIL_USERNAME }}" \
+              -e SPRING_MAIL_PASSWORD="${{ secrets.SPRING_MAIL_PASSWORD }}" \
+              -e STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" \
+              -e STRIPE_PUBLIC_KEY="${{ secrets.STRIPE_PUBLIC_KEY }}" \
+              -e VN_PAY_TERMINAL_ID="${{ secrets.VN_PAY_TERMINAL_ID }}" \
+              -e VN_PAY_SECRET_KEY="${{ secrets.VN_PAY_SECRET_KEY }}" \
+              -e VN_PAY_PAYMENT_URL="${{ secrets.VN_PAY_PAYMENT_URL }}" \
+              -e VN_PAY_RETURN_URL="${{ secrets.VN_PAY_RETURN_URL }}" \
+              -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
+              -e JWT_REFRESH_KEY="${{ secrets.JWT_REFRESH_KEY }}" \
               ${{ secrets.DOCKERHUB_USERNAME }}/dev-academy:${{ github.sha }}
+            
+            echo "=== Docker container status ==="
+            docker ps -a
+
+            echo "=== Logs ==="
+            docker logs dev-academy-container || echo "No logs found"
