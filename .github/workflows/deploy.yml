@@ -1,12 +1,10 @@
 name: Spring Boot CI/CD Pipeline
 
-# Define triggers for the pipeline - when code is pushed to main branch
 on:
   push:
     branches:
       - main
 
-# Define jobs to be executed
 jobs:
   # Job 1: Build and test the application
   build_and_test:
@@ -14,37 +12,22 @@ jobs:
 
     steps:
       - name: Checkout code
-        # Use the checkout action to copy code from repository to the Ubuntu runner
         uses: actions/checkout@v3
 
       - name: Set up JDK 21
-        # Set up Java Development Kit for building the Spring Boot application
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
 
-#      - name: Setup Maven cache
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/.m2/repository
-#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-#          restore-keys: |
-#            ${{ runner.os }}-maven-
-#
-#      - name: Build with Maven
-#        run: mvn -B package --file pom.xml
-
       - name: Login to Docker Hub
-        # Login to Docker Hub using stored secrets
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
-        # Build the Docker image using the Dockerfile and push it to Docker Hub
         uses: docker/build-push-action@v4
         with:
           context: .
