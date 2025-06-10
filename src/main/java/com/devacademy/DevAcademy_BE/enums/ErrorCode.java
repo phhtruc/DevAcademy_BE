@@ -91,8 +91,12 @@ public enum ErrorCode {
 
     // payment 2500**
     INVALID_PAYMENT_DATA(250000, "Invalid payment data", HttpStatus.BAD_REQUEST),
-    PAYMENT_FAILED(250001, "Payment failed", HttpStatus.BAD_REQUEST)
+    PAYMENT_FAILED(250001, "Payment failed", HttpStatus.BAD_REQUEST),
 
+    // error code github : 2600*
+    GITHUB_LINK(26000, "Github link must be not blank", HttpStatus.BAD_REQUEST),
+    GITHUB_NOT_FOUND(26001, "GitHub link not found or invalid! ", HttpStatus.BAD_REQUEST),
+    GITHUB_API_ERROR(26002, "Error calling GitHub API", HttpStatus.INTERNAL_SERVER_ERROR),
 
     ;
 
