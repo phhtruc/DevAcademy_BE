@@ -97,7 +97,8 @@ public enum ErrorCode {
     GITHUB_LINK(26000, "Github link must be not blank", HttpStatus.BAD_REQUEST),
     GITHUB_NOT_FOUND(26001, "GitHub link not found or invalid! ", HttpStatus.BAD_REQUEST),
     GITHUB_API_ERROR(26002, "Error calling GitHub API", HttpStatus.INTERNAL_SERVER_ERROR),
-
+    INVALID_FILE_FORMAT(26003, "Invalid file format", HttpStatus.BAD_REQUEST),
+    MISSING_SUBMISSION_DATA(26004, "Missing submission data", HttpStatus.BAD_REQUEST),
     ;
 
     Integer code;

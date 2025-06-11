@@ -1,8 +1,10 @@
 package com.devacademy.DevAcademy_BE.service.impl;
 
 import com.devacademy.DevAcademy_BE.dto.submitDTO.SubmitRequestDTO;
+import com.devacademy.DevAcademy_BE.entity.PromptEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
 import com.devacademy.DevAcademy_BE.exception.ApiException;
+import com.devacademy.DevAcademy_BE.repository.PromptRepository;
 import com.devacademy.DevAcademy_BE.service.AIService;
 import com.devacademy.DevAcademy_BE.service.SubmissionService;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -34,33 +36,46 @@ public class SubmissionServiceImpl implements SubmissionService {
     static String GITHUB_API_URL = "https://api.github.com/repos/{owner}/{repo}/zipball/{branch}";
     RestTemplate restTemplate;
     AIService AIService;
+    PromptRepository promptRepository;
 
     @Override
     public String submission(SubmitRequestDTO requestDTO, MultipartFile file) {
         try {
-            if (!requestDTO.getGithubLink().startsWith("https://github.com/")) {
-                throw new ApiException(ErrorCode.GITHUB_NOT_FOUND);
-            }
-            GitHubRepoInfo repoInfo = parseGitHubUrl(requestDTO.getGithubLink());
+            if(requestDTO.getGithubLink() != null && !requestDTO.getGithubLink().isEmpty()) {
+                if (!requestDTO.getGithubLink().startsWith("https://github.com/")) {
+                    throw new ApiException(ErrorCode.GITHUB_NOT_FOUND);
+                }
+                GitHubRepoInfo repoInfo = parseGitHubUrl(requestDTO.getGithubLink());
 
-            String zipUrl = GITHUB_API_URL
-                    .replace("{owner}", repoInfo.owner())
-                    .replace("{repo}", repoInfo.repo())
-                    .replace("{branch}", repoInfo.branch());
+                String zipUrl = GITHUB_API_URL
+                        .replace("{owner}", repoInfo.owner())
+                        .replace("{repo}", repoInfo.repo())
+                        .replace("{branch}", repoInfo.branch());
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + githubToken);
-            headers.set("Accept", "application/vnd.github+json");
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization", "Bearer " + githubToken);
+                headers.set("Accept", "application/vnd.github+json");
 
-            RequestEntity<Void> request = new RequestEntity<>(headers, HttpMethod.GET, URI.create(zipUrl));
-            ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
+                RequestEntity<Void> request = new RequestEntity<>(headers, HttpMethod.GET, URI.create(zipUrl));
+                ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Map<String, String> javaFiles = extractTextFilesFromZip(new ByteArrayInputStream(response.getBody()));
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    Map<String, String> javaFiles = extractTextFilesFromZip(new ByteArrayInputStream(response.getBody()));
 
-                return AIService.reviewCode(javaFiles);
+                    return AIService.reviewCode(contentProcess(javaFiles, requestDTO));
+                } else {
+                    throw new RuntimeException("Failed to download zip: " + response.getStatusCode());
+                }
+            } else if (file != null && !file.isEmpty()) {
+                if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".zip")) {
+                    throw new ApiException(ErrorCode.INVALID_FILE_FORMAT);
+                }
+
+                Map<String, String> textFiles = extractTextFilesFromZip(file.getInputStream());
+
+                return AIService.reviewCode(contentProcess(textFiles, requestDTO));
             } else {
-                throw new RuntimeException("Failed to download zip: " + response.getStatusCode());
+                throw new ApiException(ErrorCode.MISSING_SUBMISSION_DATA);
             }
 
         } catch (Exception e) {
@@ -125,9 +140,9 @@ public class SubmissionServiceImpl implements SubmissionService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+            var response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
             if (response.getStatusCode().is2xxSuccessful()) {
-                return (String) response.getBody().get("default_branch");
+                return (String) Objects.requireNonNull(response.getBody()).get("default_branch");
             }
 
         } catch (Exception e) {
@@ -168,6 +183,31 @@ public class SubmissionServiceImpl implements SubmissionService {
         return IGNORE_FILES.contains(fileName) ||
                 IGNORE_FILE_EXTENSIONS.stream().anyMatch(fileName::endsWith) ||
                 IGNORE_BINARY_EXTENSIONS.stream().anyMatch(fileName.toLowerCase()::endsWith);
+    }
+
+    private String contentProcess(Map<String, String> javaFiles, SubmitRequestDTO requestDTO) {
+        StringBuilder messageBuilder = new StringBuilder();
+
+        String prompt = promptRepository.findPromptEntityByCourseEntityIdAndIsActive
+                        (Long.parseLong(requestDTO.getIdCourse()), true)
+                .map(PromptEntity::getContentStruct)
+                .orElseThrow(() -> new ApiException(ErrorCode.PROMPT_NOT_FOUNT));
+
+        prompt = prompt.formatted(requestDTO.getExerciseTitle(), requestDTO.getLanguage());
+
+        messageBuilder.append(prompt).append("\n\n");
+
+        for (Map.Entry<String, String> entry : javaFiles.entrySet()) {
+            String fileName = entry.getKey();
+            String content = entry.getValue();
+
+            messageBuilder.append("File: ").append(fileName).append("\n");
+            messageBuilder.append("```\n");
+            messageBuilder.append(content).append("\n");
+            messageBuilder.append("```\n\n");
+        }
+
+        return messageBuilder.toString();
     }
 
 //    private static final Set<String> SOURCE_CODE_EXTENSIONS = new HashSet<>(Arrays.asList(
