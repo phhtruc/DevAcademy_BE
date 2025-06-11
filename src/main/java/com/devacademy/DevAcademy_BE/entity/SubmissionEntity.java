@@ -15,7 +15,7 @@ import org.hibernate.annotations.Where;
 @Where(clause = "xoa = false")
 @Table(name = "BAINOP")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SubmitionEntity extends BaseEntity {
+public class SubmissionEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

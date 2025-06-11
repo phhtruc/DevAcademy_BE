@@ -1,5 +1,7 @@
 package com.devacademy.DevAcademy_BE.service.impl;
 
+import com.devacademy.DevAcademy_BE.enums.ErrorCode;
+import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.service.AIService;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +48,7 @@ public class ChatGPTServiceImpl implements AIService {
 
         JSONObject jsonResponse = new JSONObject(response);
         if (!jsonResponse.has("choices")) {
-            return "Review failed: Unexpected response: " + response;
+            throw new ApiException(ErrorCode.GITHUB_API_ERROR);
         }
 
         JSONArray choicesArray = jsonResponse.getJSONArray("choices");

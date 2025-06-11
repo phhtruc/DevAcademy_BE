@@ -1,10 +1,17 @@
 package com.devacademy.DevAcademy_BE.service.impl;
 
+import com.devacademy.DevAcademy_BE.dto.submitDTO.SubmissionResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.submitDTO.SubmitRequestDTO;
+import com.devacademy.DevAcademy_BE.entity.LessonEntity;
 import com.devacademy.DevAcademy_BE.entity.PromptEntity;
+import com.devacademy.DevAcademy_BE.entity.SubmissionEntity;
+import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
+import com.devacademy.DevAcademy_BE.enums.SubmitStatus;
 import com.devacademy.DevAcademy_BE.exception.ApiException;
+import com.devacademy.DevAcademy_BE.mapper.SubmissionMapper;
 import com.devacademy.DevAcademy_BE.repository.PromptRepository;
+import com.devacademy.DevAcademy_BE.repository.SubmissionRepository;
 import com.devacademy.DevAcademy_BE.service.AIService;
 import com.devacademy.DevAcademy_BE.service.SubmissionService;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -13,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +32,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -37,51 +47,62 @@ public class SubmissionServiceImpl implements SubmissionService {
     RestTemplate restTemplate;
     AIService AIService;
     PromptRepository promptRepository;
+    SubmissionRepository submissionRepository;
+    SubmissionMapper submissionMapper;
 
     @Override
-    public String submission(SubmitRequestDTO requestDTO, MultipartFile file) {
-        try {
-            if(requestDTO.getGithubLink() != null && !requestDTO.getGithubLink().isEmpty()) {
-                if (!requestDTO.getGithubLink().startsWith("https://github.com/")) {
-                    throw new ApiException(ErrorCode.GITHUB_NOT_FOUND);
-                }
-                GitHubRepoInfo repoInfo = parseGitHubUrl(requestDTO.getGithubLink());
+    public String submission(SubmitRequestDTO requestDTO, MultipartFile file,
+                             Authentication authentication) throws IOException, InterruptedException {
+        if (requestDTO.getGithubLink() != null && !requestDTO.getGithubLink().isEmpty()) {
+            if (!requestDTO.getGithubLink().startsWith("https://github.com/")) {
+                throw new ApiException(ErrorCode.GITHUB_NOT_FOUND);
+            }
+            GitHubRepoInfo repoInfo = parseGitHubUrl(requestDTO.getGithubLink());
 
-                String zipUrl = GITHUB_API_URL
-                        .replace("{owner}", repoInfo.owner())
-                        .replace("{repo}", repoInfo.repo())
-                        .replace("{branch}", repoInfo.branch());
+            String zipUrl = GITHUB_API_URL
+                    .replace("{owner}", repoInfo.owner())
+                    .replace("{repo}", repoInfo.repo())
+                    .replace("{branch}", repoInfo.branch());
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.set("Authorization", "Bearer " + githubToken);
-                headers.set("Accept", "application/vnd.github+json");
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + githubToken);
+            headers.set("Accept", "application/vnd.github+json");
 
-                RequestEntity<Void> request = new RequestEntity<>(headers, HttpMethod.GET, URI.create(zipUrl));
-                ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
+            RequestEntity<Void> request = new RequestEntity<>(headers, HttpMethod.GET, URI.create(zipUrl));
+            ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    Map<String, String> javaFiles = extractTextFilesFromZip(new ByteArrayInputStream(response.getBody()));
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map<String, String> javaFiles = extractTextFilesFromZip(new ByteArrayInputStream(response.getBody()));
 
-                    return AIService.reviewCode(contentProcess(javaFiles, requestDTO));
-                } else {
-                    throw new RuntimeException("Failed to download zip: " + response.getStatusCode());
-                }
-            } else if (file != null && !file.isEmpty()) {
-                if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".zip")) {
-                    throw new ApiException(ErrorCode.INVALID_FILE_FORMAT);
-                }
-
-                Map<String, String> textFiles = extractTextFilesFromZip(file.getInputStream());
-
-                return AIService.reviewCode(contentProcess(textFiles, requestDTO));
+                var resultReview = AIService.reviewCode(contentProcess(javaFiles, requestDTO));
+                addSubmit(requestDTO.getGithubLink(), resultReview, authentication, requestDTO.getIdExercise());
+                return resultReview;
             } else {
-                throw new ApiException(ErrorCode.MISSING_SUBMISSION_DATA);
+                throw new RuntimeException("Failed to download zip: " + response.getStatusCode());
+            }
+        } else if (file != null && !file.isEmpty()) {
+            if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".zip")) {
+                throw new ApiException(ErrorCode.INVALID_FILE_FORMAT);
             }
 
-        } catch (Exception e) {
-            log.error("Submission failed: ", e);
-            return "Review failed: " + e.getMessage();
+            Map<String, String> textFiles = extractTextFilesFromZip(file.getInputStream());
+
+            var resultReview = AIService.reviewCode(contentProcess(textFiles, requestDTO));
+            addSubmit(requestDTO.getGithubLink(), resultReview, authentication, requestDTO.getIdExercise());
+            return resultReview;
+        } else {
+            throw new ApiException(ErrorCode.MISSING_SUBMISSION_DATA);
         }
+    }
+
+    @Override
+    public List<SubmissionResponseDTO> submissionHistory(Long lessonId, Authentication auth) {
+        UserEntity user = (UserEntity) auth.getPrincipal();
+
+        return submissionRepository
+                .findAllByUserIdAndLessonEntityIdOrderByCreatedDateDesc(user.getId(), lessonId).stream()
+                .map(submissionMapper::toSubmissionResponseDTO)
+                .collect(Collectors.toList());
     }
 
     private GitHubRepoInfo parseGitHubUrl(String url) {
@@ -153,13 +174,13 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     private static final Set<String> IGNORE_DIRECTORIES = new HashSet<>(Arrays.asList(
             "node_modules", "target", "build", "dist", "out", ".git", ".svn",
-            "__pycache__", ".pytest_cache", "venv", "env",
+            "__pycache__", ".pytest_cache", "venv", "env", "assets",
             "bin", "obj", "packages", ".gradle", ".idea", ".vscode", ".mvn"
     ));
 
     private static final Set<String> IGNORE_FILES = new HashSet<>(Arrays.asList(
             ".gitignore", ".gitkeep", ".dockerignore", "Dockerfile", "mvnw",
-            "package-lock.json", "yarn.lock", "Gemfile.lock", "composer.lock",".gitattributes"
+            "package-lock.json", "yarn.lock", "Gemfile.lock", "composer.lock", ".gitattributes"
     ));
 
     private static final Set<String> IGNORE_FILE_EXTENSIONS = Set.of(
@@ -185,13 +206,13 @@ public class SubmissionServiceImpl implements SubmissionService {
                 IGNORE_BINARY_EXTENSIONS.stream().anyMatch(fileName.toLowerCase()::endsWith);
     }
 
-    private String contentProcess(Map<String, String> javaFiles, SubmitRequestDTO requestDTO) {
+    private String contentProcess(Map<String, String> javaFiles, SubmitRequestDTO requestDTO) throws IOException {
         StringBuilder messageBuilder = new StringBuilder();
 
         String prompt = promptRepository.findPromptEntityByCourseEntityIdAndIsActive
                         (Long.parseLong(requestDTO.getIdCourse()), true)
                 .map(PromptEntity::getContentStruct)
-                .orElseThrow(() -> new ApiException(ErrorCode.PROMPT_NOT_FOUNT));
+                .orElseThrow(() -> new ApiException(ErrorCode.PROMPT_NOT_FOUNT_ERROR));
 
         prompt = prompt.formatted(requestDTO.getExerciseTitle(), requestDTO.getLanguage());
 
@@ -210,30 +231,24 @@ public class SubmissionServiceImpl implements SubmissionService {
         return messageBuilder.toString();
     }
 
-//    private static final Set<String> SOURCE_CODE_EXTENSIONS = new HashSet<>(Arrays.asList(
-//            ".java", ".kt", ".scala",           // JVM languages
-//            ".js", ".ts", ".jsx", ".tsx",       // JavaScript/TypeScript
-//            ".py", ".pyx", ".pyi",              // Python
-//            ".cpp", ".cc", ".cxx", ".c", ".h", ".hpp", // C/C++
-//            ".cs", ".vb", ".fs",                // .NET languages
-//            ".php", ".php3", ".php4", ".php5",  // PHP
-//            ".rb", ".rake", ".gemspec",         // Ruby
-//            ".go", ".mod", ".sum",              // Go
-//            ".rs", ".toml",                     // Rust
-//            ".swift",                           // Swift
-//            ".dart",                            // Dart
-//            ".r", ".R",                         // R
-//            ".m", ".mm",                        // Objective-C
-//            ".pl", ".pm", ".t",                 // Perl
-//            ".lua",                             // Lua
-//            ".sh", ".bash", ".zsh",             // Shell scripts
-//            ".sql",                             // SQL
-//            ".html", ".htm", ".css"
-//            ,".xml"
-//    ));
-//
-//    private boolean hasValidSourceExtension(String fileName) {
-//        return SOURCE_CODE_EXTENSIONS.stream()
-//                .anyMatch(fileName.toLowerCase()::endsWith);
-//    }
+    private void addSubmit(String githubLink, String resultReview, Authentication authentication, String idExercise) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+        SubmitStatus status;
+        if (resultReview.contains("PASS")) {
+            status = SubmitStatus.PASS;
+        } else if (resultReview.contains("FAIL")) {
+            status = SubmitStatus.FAIL;
+        } else {
+            status = SubmitStatus.PENDING;
+        }
+        var submit = SubmissionEntity.builder()
+                .submissionLink(githubLink)
+                .review(resultReview)
+                .user(user)
+                .isDeleted(false)
+                .status(status)
+                .lessonEntity(LessonEntity.builder().id(Long.parseLong(idExercise)).build())
+                .build();
+        submissionRepository.save(submit);
+    }
 }
