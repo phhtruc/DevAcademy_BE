@@ -52,7 +52,7 @@ jobs:
             
             # Create docker network if it doesn't exist
             docker network inspect app-network >/dev/null 2>&1 || docker network create app-network      
-      
+            
             # Stop and remove the existing container if it exists
             docker stop dev-academy-container || true
             docker rm dev-academy-container || true
@@ -66,7 +66,7 @@ jobs:
             -v redis-data:/data \
             --restart always \
             redis:alpine
-  
+            
             # Start Spring Boot container
             docker run -d --name dev-academy-container \
               --network app-network \
@@ -87,6 +87,8 @@ jobs:
               -e JWT_REFRESH_KEY="${{ secrets.JWT_REFRESH_KEY }}" \
               -e SPRING_DATA_REDIS_HOST=dev-academy-redis \
               -e SPRING_DATA_REDIS_PORT=6379 \
+              -e TOKEN_GITHUB=${{ secrets.TOKEN_GITHUB }} \
+              -e CHATGPT_API_KEY=${{ secrets.CHATGPT_API_KEY }} \
               --restart always \
               ${{ secrets.DOCKERHUB_USERNAME }}/dev-academy:${{ github.sha }}
             
@@ -95,10 +97,10 @@ jobs:
 
             echo "=== Logs ==="
             docker logs dev-academy-container || echo "No logs found"
-                    
+            
             echo "=== Application Logs ==="
             docker logs dev-academy-container || echo "No application logs found"
-                    
+            
             echo "=== Redis Logs ==="
             docker logs dev-academy-redis || echo "No Redis logs found"
             

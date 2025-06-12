@@ -31,11 +31,8 @@ ENV SPRING_PROFILES_ACTIVE=product
 # Copy JAR file from build stage
 COPY --from=builder /app/target/*.jar app.jar
 
-# Copy local.env for environment variables
-COPY local.env ./
-
 # Expose your application port
 EXPOSE 8002
 
-# Run Spring Boot application with env vars loaded
-ENTRYPOINT ["/bin/sh", "-c", ". /app/local.env && java -jar app.jar"]
+# Run Spring Boot application
+ENTRYPOINT ["java", "-jar", "app.jar"]

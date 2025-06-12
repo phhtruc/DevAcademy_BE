@@ -42,7 +42,7 @@ import java.util.zip.ZipInputStream;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class SubmissionServiceImpl implements SubmissionService {
-    static String githubToken = Dotenv.configure().filename("local.env").load().get("GITHUB_TOKEN");
+    static String githubToken = System.getenv("TOKEN_GITHUB");
     static String GITHUB_API_URL = "https://api.github.com/repos/{owner}/{repo}/zipball/{branch}";
     RestTemplate restTemplate;
     AIService AIService;

@@ -20,7 +20,8 @@ import java.net.http.HttpResponse;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class ChatGPTServiceImpl implements AIService {
-    static String OPENAI_API_KEY = Dotenv.configure().filename("local.env").load().get("CHATGPT_API_KEY");
+
+    static String OPENAI_API_KEY = System.getenv("CHATGPT_API_KEY");
     static String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
     @Override
