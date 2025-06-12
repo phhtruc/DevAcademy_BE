@@ -85,7 +85,8 @@
         <p>
             Bạn có thể nhấn vào nút bên dưới để bắt đầu học ngay:
         </p>
-        <a th:href="@{http://localhost:5173/khoa-hoc/{id}(id=${courseId})}" class="button">👉 Truy cập khóa học</a>
+        <a th:href="${frontendUrl + '/khoa-hoc/' + courseId}" class="button">👉 Truy cập khóa học</a>
+        <!--        <a th:href="@{http://localhost:5173/khoa-hoc/{id}(id=${courseId})}" class="button">👉 Truy cập khóa học</a>-->
     </div>
     <div class="footer">
         <p>Cảm ơn bạn đã tin tưởng và lựa chọn nền tảng của chúng tôi.</p>
