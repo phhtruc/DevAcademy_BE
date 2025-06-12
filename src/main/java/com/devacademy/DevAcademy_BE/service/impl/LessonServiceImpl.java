@@ -59,14 +59,15 @@ public class LessonServiceImpl implements LessonService {
                 Sort.by("lessonOrder"));
         Page<LessonEntity> course = lessonRepository.findAllByChapterEntityId(idChapter, pageable);
 
-        if(auth != null && auth.getPrincipal() instanceof UserEntity userEntity){
-            if(checkCourseIsPurchased(userEntity.getId(), idCourse)){
-                course.forEach(lesson -> lesson.setIsPublic(true));
+        List<LessonResponseDTO> list = course.map(lessonMapper::toLessonResponseDTO)
+                .stream().collect(Collectors.toList());
+
+        if (auth != null && auth.getPrincipal() instanceof UserEntity userEntity) {
+            if (checkCourseIsPurchased(userEntity.getId(), idCourse)) {
+                list.forEach(dto -> dto.setIsPublic(true));
             }
         }
 
-        List<LessonResponseDTO> list = course.map(lessonMapper::toLessonResponseDTO)
-                .stream().collect(Collectors.toList());
         return PageResponse.builder()
                 .page(page)
                 .pageSize(pageSize)
@@ -165,8 +166,7 @@ public class LessonServiceImpl implements LessonService {
                 Sort.by("lessonOrder"));
 
         Specification<LessonEntity> spec = Specification
-                .where(LessonSpecification.hasTitle(searchDTO))
-                ;
+                .where(LessonSpecification.hasTitle(searchDTO));
         Page<LessonEntity> course = lessonRepository.findAll(spec, pageable);
         List<LessonResponseDTO> list = course.map(lessonMapper::toLessonResponseDTO)
                 .stream().collect(Collectors.toList());

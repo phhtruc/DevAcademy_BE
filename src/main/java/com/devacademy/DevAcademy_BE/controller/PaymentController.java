@@ -1,7 +1,7 @@
 package com.devacademy.DevAcademy_BE.controller;
 
 import com.devacademy.DevAcademy_BE.dto.paymentDTO.PaymentRequest;
-import com.devacademy.DevAcademy_BE.service.VNPayService;
+import com.devacademy.DevAcademy_BE.service.PaymentService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PaymentController {
 
-    VNPayService vnPayService;
+    PaymentService paymentService;
 
     @PostMapping("/create-payment-url")
     public ResponseEntity<?> createPaymentUrl(@RequestBody PaymentRequest paymentRequest,
                                               HttpServletRequest request) {
-        return JsonResponse.ok(vnPayService.createPaymentUrl(paymentRequest, request));
+        return JsonResponse.ok(paymentService.createPaymentUrl(paymentRequest, request));
     }
 
     @GetMapping("/payment-return")
@@ -30,6 +30,6 @@ public class PaymentController {
                                            Authentication authentication,
                                            @RequestParam String courseName,
                                            @RequestParam Long courseId) {
-        return JsonResponse.ok(vnPayService.processPaymentReturn(request, authentication, courseName, courseId));
+        return JsonResponse.ok(paymentService.processPaymentReturn(request, authentication, courseName, courseId));
     }
 }

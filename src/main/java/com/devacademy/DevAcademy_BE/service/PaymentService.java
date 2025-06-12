@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
-public interface VNPayService {
+public interface PaymentService {
     PaymentResponse createPaymentUrl(PaymentRequest paymentRequest, HttpServletRequest request);
     Map<String, Object> processPaymentReturn(HttpServletRequest request, Authentication authentication,
                                              String courseName, Long courseId);
