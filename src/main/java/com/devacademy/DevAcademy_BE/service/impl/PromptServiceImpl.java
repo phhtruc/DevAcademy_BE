@@ -79,7 +79,7 @@ public class PromptServiceImpl implements PromptService {
 
     @Override
     public PromptResponseDTO updateConfigActive(Long id, Long idCourse) {
-        promptRepository.findAllPromptByCourseEntityId(idCourse)
+        promptRepository.findAllPromptByCourseEntityIdAndIsActive(idCourse, true)
                 .forEach(promptEntity -> {
                     promptEntity.setIsActive(false);
                     promptRepository.save(promptEntity);

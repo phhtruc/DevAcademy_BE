@@ -82,7 +82,7 @@ public enum ErrorCode {
 
     // prompt 2300**
     PROMPT_NOT_FOUNT(230000, "Prompt not found", HttpStatus.NOT_FOUND),
-    //CATEGORY_NAME_INVALID(21001, "Category name must be not blank", HttpStatus.NOT_FOUND),
+    PROMPT_NOT_FOUNT_ERROR(230001, "Khoá học chưa được cấu hình prompt để nộp bài tập. Thử lại sau!", HttpStatus.NOT_FOUND),
 
     // comment 2400**
     CONTENT_INVALID(240000, "Content cannot be blank", HttpStatus.NOT_FOUND),
@@ -91,8 +91,17 @@ public enum ErrorCode {
 
     // payment 2500**
     INVALID_PAYMENT_DATA(250000, "Invalid payment data", HttpStatus.BAD_REQUEST),
-    PAYMENT_FAILED(250001, "Payment failed", HttpStatus.BAD_REQUEST)
+    PAYMENT_FAILED(250001, "Payment failed", HttpStatus.BAD_REQUEST),
 
+    // error code github : 2600*
+    GITHUB_LINK(26000, "Github link must be not blank", HttpStatus.BAD_REQUEST),
+    GITHUB_NOT_FOUND(26001, "Đường dẫn github không đúng định dạng", HttpStatus.BAD_REQUEST),
+    GITHUB_API_ERROR(26002, "Error calling GitHub API", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_FILE_FORMAT(26003, "Invalid file format", HttpStatus.BAD_REQUEST),
+    MISSING_SUBMISSION_DATA(26004, "Missing submission data", HttpStatus.BAD_REQUEST),
+
+    // submission : 2700*
+    SUBMISSION_NOT_FOUND(27000, "Submission not found", HttpStatus.BAD_REQUEST),
 
     ;
 

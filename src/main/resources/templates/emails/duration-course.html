@@ -92,7 +92,7 @@
             Nếu bạn muốn tiếp tục học, bạn có thể gia hạn khóa học hoặc liên hệ
             với chúng tôi để được hỗ trợ.
         </p>
-        <a th:href="@{http://localhost:5173/khoa-hoc/{id}(id=${courseId})}" class="button">Gia hạn khóa học</a>
+        <a th:href="${frontendUrl + '/khoa-hoc/' + courseId}" class="button">Gia hạn khóa học</a>
     </div>
     <div class="footer">
         <p>Cảm ơn bạn đã tin tưởng và lựa chọn nền tảng của chúng tôi.</p>

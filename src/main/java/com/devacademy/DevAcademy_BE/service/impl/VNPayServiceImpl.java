@@ -14,7 +14,7 @@ import com.devacademy.DevAcademy_BE.enums.RegisterType;
 import com.devacademy.DevAcademy_BE.repository.CoursePayRepository;
 import com.devacademy.DevAcademy_BE.repository.CourseRegisterRepository;
 import com.devacademy.DevAcademy_BE.service.MailService;
-import com.devacademy.DevAcademy_BE.service.VNPayService;
+import com.devacademy.DevAcademy_BE.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
-public class PaymentServiceImpl implements VNPayService {
+public class VNPayServiceImpl implements PaymentService {
 
     VNPayConfig vnPayConfig;
     CoursePayRepository coursePayRepository;

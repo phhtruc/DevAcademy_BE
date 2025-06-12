@@ -12,16 +12,12 @@ import java.util.Optional;
 
 @Repository
 public interface PromptRepository extends JpaRepository<PromptEntity, Long> {
-    @Query("select r from PromptEntity r where r.isActive=true")
-    PromptEntity findByActive();
-
-    @Query("select r from PromptEntity r where 1=1 and r.isActive=true and r.id=:id")
-    PromptEntity findByIdActive(Long id);
 
     Page<PromptEntity> findAllPromptByCourseEntityId(Long id, Pageable pageable);
 
     Optional<PromptEntity> findByIdAndCourseEntityId(Long id, Long idCourse);
 
-    List<PromptEntity> findAllPromptByCourseEntityId(Long id);
+    Optional<PromptEntity> findPromptEntityByCourseEntityIdAndIsActive(Long courseEntityId, Boolean isActive);
 
+    List<PromptEntity> findAllPromptByCourseEntityIdAndIsActive(Long courseEntityId, Boolean isActive);
 }

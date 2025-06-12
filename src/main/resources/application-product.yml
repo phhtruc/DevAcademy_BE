@@ -61,3 +61,7 @@ vnpay:
   secret-key: LBWQJHFZXJ7RMX3DKOQ4VMFFBZRLBD0B
   payment-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
   return-url: http://localhost:5173/thanh-toan
+
+app:
+  frontend:
+    url: https://phhtruc.id.vn

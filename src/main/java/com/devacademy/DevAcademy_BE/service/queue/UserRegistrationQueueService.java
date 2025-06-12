@@ -12,6 +12,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.BlockingQueue;
@@ -21,15 +22,18 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserRegistrationQueueService {
 
-    BlockingQueue<UserRegistrationTask> registrationQueue = new LinkedBlockingQueue<>();
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    final BlockingQueue<UserRegistrationTask> registrationQueue = new LinkedBlockingQueue<>();
+    final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    UserRepository userRepository;
-    CloudinaryService cloudinaryService;
-    MailService mailService;
+    final UserRepository userRepository;
+    final CloudinaryService cloudinaryService;
+    final MailService mailService;
+
+    @Value("${app.frontend.url}")
+    String frontendUrl;
 
     @PostConstruct
     public void init() {
@@ -71,7 +75,7 @@ public class UserRegistrationQueueService {
             }
 
             // Send email
-            String resetPasswordLink = String.format("http://localhost:5173/auth/create-password/token=%s", task.getToken());
+            String resetPasswordLink = String.format("%s/auth/create-password/token=%s", frontendUrl, task.getToken());
             String emailSubject = "Set up your DevAcademy account password";
             mailService.setUpAccount(user.getFullName(), resetPasswordLink, user.getEmail(), emailSubject);
 

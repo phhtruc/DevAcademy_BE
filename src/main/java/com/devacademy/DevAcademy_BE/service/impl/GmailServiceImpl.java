@@ -7,6 +7,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -18,25 +19,27 @@ import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class GmailServiceImpl implements MailService {
 
-    JavaMailSender javaMailSender;
-    TemplateEngine templateEngine;
+    final JavaMailSender javaMailSender;
+    final TemplateEngine templateEngine;
+
+    @Value("${app.frontend.url}")
+    String frontendUrl;
+
 
     static String SPRING_MAIL_USERNAME = System.getenv("SPRING_MAIL_USERNAME");
 
     @Override
-    public void setUpAccount(String userName, String resetLink, String toEmail, String subject)
-            throws MessagingException {
+    public void setUpAccount(String userName, String resetLink, String toEmail, String subject) {
         Context context = createContextForSetupAccount(userName, resetLink);
         String htmlContent = templateEngine.process("emails/setup-account", context);
         sendHtmlEmail(toEmail, subject, htmlContent);
     }
 
     @Override
-    public void buyCourseMail(String userName, Long courseId, String courseName, String toEmail, String subject)
-            throws MessagingException {
+    public void buyCourseMail(String userName, Long courseId, String courseName, String toEmail, String subject) {
         Context context = createContext(userName, courseName, courseId);
         String htmlContent = templateEngine.process("emails/buy-course-user", context);
         sendHtmlEmail(toEmail, subject, htmlContent);
@@ -44,13 +47,13 @@ public class GmailServiceImpl implements MailService {
 
     @Override
     public void durationCourse(String userName, String expiredDate, String courseName, String toEmail, String subject,
-                               Long courseId) throws MessagingException {
+                               Long courseId) {
         Context context = createContextDuration(userName, courseName, expiredDate, courseId);
         String htmlContent = templateEngine.process("emails/duration-course", context);
         sendHtmlEmail(toEmail, subject, htmlContent);
     }
 
-    private void sendHtmlEmail(String toEmail, String subject, String htmlContent) throws MessagingException {
+    private void sendHtmlEmail(String toEmail, String subject, String htmlContent) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -71,6 +74,7 @@ public class GmailServiceImpl implements MailService {
         context.setVariable("userName", userName);
         context.setVariable("courseName", courseName);
         context.setVariable("courseId", courseId);
+        context.setVariable("frontendUrl", frontendUrl);
         return context;
     }
 
@@ -87,6 +91,7 @@ public class GmailServiceImpl implements MailService {
         context.setVariable("courseName", courseName);
         context.setVariable("expiredDate", expiredDate);
         context.setVariable("courseId", courseId);
+        context.setVariable("frontendUrl", frontendUrl);
         return context;
     }
 }
