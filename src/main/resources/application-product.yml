@@ -60,7 +60,7 @@ vnpay:
   terminal-id: A9R9W8XL
   secret-key: LBWQJHFZXJ7RMX3DKOQ4VMFFBZRLBD0B
   payment-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
-  return-url: http://localhost:5173/thanh-toan
+  return-url: https://phhtruc.id.vn/thanh-toan
 
 app:
   frontend:

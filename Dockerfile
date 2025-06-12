@@ -12,6 +12,7 @@ RUN ./mvnw dependency:go-offline -B
 
 # Copy source code
 COPY src/ src/
+COPY local.env ./
 
 # Build the application
 RUN ./mvnw clean package -DskipTests
@@ -35,4 +36,4 @@ COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8002
 
 # Run Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["/bin/sh", "-c", ". /app/local.env && java -jar app.jar"]
