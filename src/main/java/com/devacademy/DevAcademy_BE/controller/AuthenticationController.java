@@ -4,6 +4,7 @@ import com.devacademy.DevAcademy_BE.auth.AuthenticationRequest;
 import com.devacademy.DevAcademy_BE.dto.ResetPasswordDTO;
 import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
 import com.devacademy.DevAcademy_BE.service.AuthenticationService;
+import com.devacademy.DevAcademy_BE.service.SocialService;
 import com.devacademy.DevAcademy_BE.service.UserService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ public class AuthenticationController {
 
     AuthenticationService authenticationService;
     UserService userService;
+    SocialService socialService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid UserRequestDTO request){
@@ -33,6 +35,16 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request){
         return JsonResponse.ok(authenticationService.authenticate(request));
+    }
+
+    @GetMapping("/social-login")
+    public ResponseEntity<?> socialLogin(){
+        return JsonResponse.ok(socialService.getSocialLoginUrl());
+    }
+
+    @GetMapping("/social/callback")
+    public ResponseEntity<?> socialCallback(@RequestParam String code){
+        return JsonResponse.ok(socialService.handleSocialLogin(code));
     }
 
     @PostMapping("/refresh-token")

@@ -27,4 +27,6 @@ public class AuthenticationRequest {
     String deviceToken;
 
     String version;
+
+    Boolean rememberMe;
 }
