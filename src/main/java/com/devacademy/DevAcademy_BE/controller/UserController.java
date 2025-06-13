@@ -53,6 +53,11 @@ public class UserController {
         return JsonResponse.ok(courseService.getCoursesByIdUser(page, pageSize, authentication));
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(Authentication authentication) {
+        return JsonResponse.ok(userService.getProfile(authentication));
+    }
+
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable UUID id,
