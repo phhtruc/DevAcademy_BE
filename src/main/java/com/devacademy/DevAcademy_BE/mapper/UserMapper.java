@@ -1,9 +1,6 @@
 package com.devacademy.DevAcademy_BE.mapper;
 
-import com.devacademy.DevAcademy_BE.dto.userDTO.AdminRequestDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserRequestDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserResponseDTO;
-import com.devacademy.DevAcademy_BE.dto.userDTO.UserUpdateRequestDTO;
+import com.devacademy.DevAcademy_BE.dto.userDTO.*;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import org.mapstruct.Mapper;
 
@@ -18,4 +15,5 @@ public interface UserMapper {
 
     UserEntity toUserEntity(AdminRequestDTO userRequestDTO);
 
+    ProfileResponseDTO toProfileResponseDTO(UserEntity userEntity);
 }

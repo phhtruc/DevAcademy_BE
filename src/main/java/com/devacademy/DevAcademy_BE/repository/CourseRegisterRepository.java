@@ -15,4 +15,6 @@ public interface CourseRegisterRepository extends JpaRepository<CourseRegisterEn
             UUID userEntityId, Long courseEntityId, RegisterType registerType);
 
     Integer countByCourseEntityIdAndRegisterType(Long courseId, RegisterType registerType);
+
+    Integer countByUserEntityIdAndRegisterType(UUID userEntityId, RegisterType registerType);
 }

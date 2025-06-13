@@ -7,10 +7,12 @@ import com.devacademy.DevAcademy_BE.entity.RoleEntity;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.entity.UserHasRoleEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
+import com.devacademy.DevAcademy_BE.enums.RegisterType;
 import com.devacademy.DevAcademy_BE.enums.RoleType;
 import com.devacademy.DevAcademy_BE.enums.UserStatus;
 import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.mapper.UserMapper;
+import com.devacademy.DevAcademy_BE.repository.CourseRegisterRepository;
 import com.devacademy.DevAcademy_BE.repository.RoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserHasRoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
@@ -28,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +54,7 @@ public class UserServiceImpl implements UserService {
     TokenService tokenService;
     JwtService jwtService;
     UserRegistrationQueueService userRegistrationQueueService;
+    CourseRegisterRepository courseRegisterRepository;
 
     @Override
     public UserResponseDTO getUserById(UUID id) {
@@ -112,6 +116,14 @@ public class UserServiceImpl implements UserService {
         return userMap;
     }
 
+    @Override
+    public ProfileResponseDTO getProfile(Authentication authentication) {
+        UserEntity userEntity = (UserEntity) authentication.getPrincipal();
+        var user = userMapper.toProfileResponseDTO(userEntity);
+        user.setTotalCourses(countUserBuyCourse(userEntity.getId()));
+        return user;
+    }
+
     private PageResponse<?> getPageResponse(int page, int pageSize, Page<UserEntity> users) {
         List<UserResponseDTO> list = users.stream()
                 .map(userMap -> {
@@ -145,7 +157,7 @@ public class UserServiceImpl implements UserService {
         RoleEntity resolvedRole = resolveRole(request.getRoles());
         associateRoleWithUser(savedUser, resolvedRole);
 
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateToken(user, false);
         tokenService.saveToken(savedUser, token, 1440);
 
         if (file != null && !file.isEmpty()) {
@@ -209,7 +221,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponseDTO(userRepository.save(existingUser));
     }
 
-    private RoleEntity resolveRole(String roleName) {
+    protected RoleEntity resolveRole(String roleName) {
         RoleType roleType;
         if (roleName == null) {
             roleType = RoleType.USER;
@@ -224,12 +236,16 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ApiException(ErrorCode.ROLE_NAME_NOT_FOUND));
     }
 
-    private void associateRoleWithUser(UserEntity user, RoleEntity role) {
+    protected void associateRoleWithUser(UserEntity user, RoleEntity role) {
         UserHasRoleEntity userHasRole = new UserHasRoleEntity();
         userHasRole.setUserEntity(user);
         userHasRole.setRoleEntity(role);
 
         userHasRoleRepository.save(userHasRole);
+    }
+
+    private Integer countUserBuyCourse(UUID uuid) {
+        return courseRegisterRepository.countByUserEntityIdAndRegisterType(uuid, RegisterType.BUY);
     }
 
 }

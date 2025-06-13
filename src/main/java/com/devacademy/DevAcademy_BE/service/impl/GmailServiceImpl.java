@@ -39,6 +39,13 @@ public class GmailServiceImpl implements MailService {
     }
 
     @Override
+    public void forgotPassword(String resetLink, String toEmail, String subject){
+        Context context = createContextForgotPassword(resetLink);
+        String htmlContent = templateEngine.process("emails/forgot-password", context);
+        sendHtmlEmail(toEmail, subject, htmlContent);
+    }
+
+    @Override
     public void buyCourseMail(String userName, Long courseId, String courseName, String toEmail, String subject) {
         Context context = createContext(userName, courseName, courseId);
         String htmlContent = templateEngine.process("emails/buy-course-user", context);
@@ -81,6 +88,12 @@ public class GmailServiceImpl implements MailService {
     private Context createContextForSetupAccount(String userName, String resetLink) {
         Context context = new Context(Locale.getDefault());
         context.setVariable("userName", userName);
+        context.setVariable("resetLink", resetLink);
+        return context;
+    }
+
+    private Context createContextForgotPassword(String resetLink) {
+        Context context = new Context(Locale.getDefault());
         context.setVariable("resetLink", resetLink);
         return context;
     }

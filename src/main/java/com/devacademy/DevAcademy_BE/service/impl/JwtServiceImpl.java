@@ -26,15 +26,9 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.refresh-key}")
     private String refreshKey;
 
-    @Value("${jwt.expriration}")
-    private long jwtExpriration;
-
-    @Value("${jwt.refresh-token.expriration}")
-    private long refreshExpriration;
-
     @Override
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(UserDetails userDetails, Boolean rememberMe) {
+        return generateToken(new HashMap<>(), userDetails, rememberMe);
     }
 
     @Override
@@ -49,29 +43,42 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, refreshExpriration, TokenType.REFRESH_TOKEN);
+    public String generateRefreshToken(UserDetails userDetails, Boolean rememberMe) {
+        long refreshExpiration;
+        if (rememberMe) {
+            refreshExpiration = 2592000000L; // 30 days
+        } else {
+            refreshExpiration = 604800000L; // 7 days
+        }
+        return buildToken(new HashMap<>(), userDetails, refreshExpiration, TokenType.REFRESH_TOKEN);
     }
 
-    private String generateToken(Map<String, Object> claims, UserDetails userDetails) {
-        return buildToken(claims, userDetails, jwtExpriration, TokenType.ACCESS_TOKEN);
+    private String generateToken(Map<String, Object> claims, UserDetails userDetails, Boolean rememberMe) {
+        long jwtExpiration;
+        if (rememberMe) {
+            jwtExpiration = 604800000L; //7d
+        } else {
+            jwtExpiration = 900000L; //15p
+        }
+        return buildToken(claims, userDetails, jwtExpiration, TokenType.ACCESS_TOKEN);
+
     }
 
-    private String buildToken(Map<String, Object> claims, UserDetails userDetails, long expriration, TokenType tokenType) {
+    private String buildToken(Map<String, Object> claims, UserDetails userDetails, long expiration, TokenType tokenType) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expriration))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getKey(tokenType), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     private Key getKey(TokenType tokenType) {
         byte[] keyBytes = new byte[0];
-        if(tokenType.equals(TokenType.ACCESS_TOKEN)) {
+        if (tokenType.equals(TokenType.ACCESS_TOKEN)) {
             keyBytes = Decoders.BASE64.decode(secretKey);
-        }else if(tokenType.equals(TokenType.REFRESH_TOKEN)) {
+        } else if (tokenType.equals(TokenType.REFRESH_TOKEN)) {
             keyBytes = Decoders.BASE64.decode(refreshKey);
         }
         return Keys.hmacShaKeyFor(keyBytes);
@@ -92,11 +99,11 @@ public class JwtServiceImpl implements JwtService {
                 .getBody();
     }
 
-    private boolean isTokenExpired(String token, TokenType tokenType){
+    private boolean isTokenExpired(String token, TokenType tokenType) {
         return extractExpiration(token, tokenType).before(new Date()); // kiểm tra xem ngày hết hạn có trước ngày hiên tại hay không
     }
 
-    private Date extractExpiration(String token, TokenType tokenType){
+    private Date extractExpiration(String token, TokenType tokenType) {
         return extractClaims(token, Claims::getExpiration, tokenType);
     } // lấy ra thời gian hết hạn của token
 
