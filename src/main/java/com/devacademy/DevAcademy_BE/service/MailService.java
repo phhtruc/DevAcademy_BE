@@ -10,4 +10,6 @@ public interface MailService {
                         Long courseId) throws MessagingException;
 
     void setUpAccount(String userName, String resetLink, String toEmail, String subject) throws MessagingException;
+
+    void forgotPassword(String resetLink, String toEmail, String subject);
 }

@@ -45,16 +45,19 @@ public class SecurityConfig {
                                 "/api/v1/users/courses",
                                 "/api/v1/lessons/{id}")
                         .permitAll()
+                        .requestMatchers("/api/v1/comments/**",
+                                "/api/v1/payments/**",
+                                "/api/v1/submissions/**",
+                                "/api/v1/users/profile",
+                                "/api/v1/users/change-password")
+                        .hasAuthority(RoleType.USER.name())
+                        .requestMatchers("/api/v1/users/{id}").hasAnyAuthority(RoleType.USER.name(), RoleType.ADMIN.name())
                         .requestMatchers("/api/v1/users/**").hasAuthority(RoleType.ADMIN.name())
                         .requestMatchers("/api/v1/categories/**",
                                 "/api/v1/tech-stacks/**",
                                 "/api/v1/prompts/**",
                                 "/api/v1/courses/**")
                         .hasAuthority(RoleType.TEACHER.name())
-                        .requestMatchers("/api/v1/comments/**",
-                                "/api/v1/payments/**",
-                                "/api/v1/submissions/**")
-                        .hasAuthority(RoleType.USER.name())
                         .anyRequest().authenticated())
                 .sessionManagement(session
                         -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

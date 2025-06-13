@@ -4,6 +4,7 @@ import com.devacademy.DevAcademy_BE.dto.PageResponse;
 import com.devacademy.DevAcademy_BE.dto.userDTO.*;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,4 +29,6 @@ public interface UserService {
     PageResponse<?> searchUser(@Valid UserSearchDTO searchDTO, int page, int pageSize);
 
     UserResponseDTO register(@Valid UserRequestDTO request);
+
+    ProfileResponseDTO getProfile(Authentication authentication);
 }

@@ -31,6 +31,9 @@ public enum ErrorCode {
     USER_NOT_FOUND(1004, "User not found", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTS(1004, "Email exists", HttpStatus.BAD_REQUEST),
     ROLE_INVALID_TYPE(1005, "Email exists", HttpStatus.BAD_REQUEST),
+    INVALID_OLD_PASSWORD(1006, "Mật khẩu hiện tại không chính xác", HttpStatus.BAD_REQUEST),
+    OLD_PASSWORD_INVALID(1007, "old password invalid", HttpStatus.BAD_REQUEST),
+    NEW_PASSWORD_INVALID(1008, "new password invalid", HttpStatus.BAD_REQUEST),
 
     //Role 2***
     ROLE_NAME_NOT_FOUND(2000, "Role name not found", HttpStatus.BAD_REQUEST),
