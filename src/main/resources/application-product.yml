@@ -5,9 +5,9 @@ spring:
     activate:
       on-profile: product
   datasource:
-    url: jdbc:mysql://db-mysql-dev-academy-do-user-23091549-0.g.db.ondigitalocean.com:25060/DevAcademy
-    username: doadmin
-    password: AVNS_jHnm_HtmlW0Sft5LT4Q
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -30,8 +30,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: mockprojectgroup6@gmail.com
-    password: qjod imqb pyng jsps
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -43,24 +43,33 @@ spring:
     template-resolver-order: 1
     prefix: classpath:/templates/
     suffix: .html
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            redirect-uri: ${REDIRECT_URI}
 
 jwt:
-  secret-key : 89dd3a965fddb1460b64c074c928ee19f6697a168bc5ec72c336fb6df64289c4
-  refresh-key : CZBpcWmn8Y6LLxLEFyUBj5battfY7nh+neuTbofnsM4=
-  expriration : 900000  # 15 minutes
-  refresh-token :
-    expriration : 604800000 # 7days
+  secret-key : ${JWT_SECRET_KEY}
+  refresh-key : ${JWT_REFRESH_KEY}
 
 cloudinary:
-  cloud_name: dn2m3s9k0
-  api_key: 378291597432836
-  api_secret: 9AuvGB1tA5cF0juYBQ5jqbo3Xwg
+  cloud_name: ${CLOUDINARY_NAME}
+  api_key: ${CLOUDINARY_API_KEY}
+  api_secret: ${CLOUDINARY_API_SECRET}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+  public-key: ${STRIPE_PUBLIC_KEY}
 
 vnpay:
-  terminal-id: A9R9W8XL
-  secret-key: LBWQJHFZXJ7RMX3DKOQ4VMFFBZRLBD0B
-  payment-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
-  return-url: https://phhtruc.id.vn/thanh-toan
+  terminal-id: ${VN_PAY_TERMINAL_ID}
+  secret-key: ${VN_PAY_SECRET_KEY}
+  payment-url: ${VN_PAY_PAYMENT_URL}
+  return-url: ${VN_PAY_RETURN_URL}
 
 app:
   frontend:

@@ -89,6 +89,12 @@ jobs:
               -e SPRING_DATA_REDIS_PORT=6379 \
               -e TOKEN_GITHUB=${{ secrets.TOKEN_GITHUB }} \
               -e CHATGPT_API_KEY=${{ secrets.CHATGPT_API_KEY }} \
+              -e CLIENT_ID=${{ secrets.CLIENT_ID }} \
+              -e CLIENT_SECRET=${{ secrets.CLIENT_SECRET }} \
+              -e REDIRECT_URI=${{ secrets.REDIRECT_URI }} \
+              -e CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }} \
+              -e CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }} \
+              -e CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }} \
               --restart always \
               ${{ secrets.DOCKERHUB_USERNAME }}/dev-academy:${{ github.sha }}
             
