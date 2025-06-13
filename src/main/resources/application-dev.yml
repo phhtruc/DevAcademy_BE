@@ -43,26 +43,23 @@ spring:
     template-resolver-order: 1
     prefix: classpath:/templates/
     suffix: .html
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          google:
-#            client-id:
-#            client-secret:
-#            redirect-uri:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            redirect-uri: ${REDIRECT_URI}
 
 jwt:
-  secret-key : 89dd3a965fddb1460b64c074c928ee19f6697a168bc5ec72c336fb6df64289c4
-  refresh-key : CZBpcWmn8Y6LLxLEFyUBj5battfY7nh+neuTbofnsM4=
-  expriration : 900000  # 15 minutes
-  refresh-token :
-    expriration : 604800000 # 7days
+  secret-key : ${JWT_SECRET_KEY}
+  refresh-key : ${JWT_REFRESH_KEY}
 
 cloudinary:
-  cloud_name: dn2m3s9k0
-  api_key: 378291597432836
-  api_secret: 9AuvGB1tA5cF0juYBQ5jqbo3Xwg
+  cloud_name: ${CLOUDINARY_NAME}
+  api_key: ${CLOUDINARY_API_KEY}
+  api_secret: ${CLOUDINARY_API_SECRET}
 
 stripe:
   secret-key: ${STRIPE_SECRET_KEY}

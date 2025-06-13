@@ -54,10 +54,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Email or Password is incorrect"));
 
-        String accessToken = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
-
-        return buildAuthenticationResponse(user, accessToken, refreshToken, "Login success");
+        String accessToken;
+        String refreshToken;
+        if (request.getRememberMe()){
+            accessToken = jwtService.generateToken(user, true);
+            refreshToken = jwtService.generateRefreshToken(user, true);
+        } else {
+            accessToken = jwtService.generateToken(user, false);
+            refreshToken = jwtService.generateRefreshToken(user, false);
+        }
+        return buildAuthenticationResponse(user, accessToken, refreshToken,
+                "Login success", request.getRememberMe());
     }
 
     @Override
@@ -72,9 +79,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (!jwtService.isTokenValid(refreshToken, user.get(), TokenType.REFRESH_TOKEN)) {
             throw new RuntimeException("token is invalid");
         }
-        String accessToken = jwtService.generateToken(user.get());
+        String accessToken = jwtService.generateToken(user.get(), false);
 
-        return buildAuthenticationResponse(user.get(), accessToken, refreshToken, "Refresh token success");
+        return buildAuthenticationResponse(user.get(), accessToken, refreshToken,
+                "Refresh token success", false);
     }
 
     @Transactional
@@ -103,10 +111,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private AuthenticationResponse buildAuthenticationResponse(UserEntity user, String accessToken, String refreshToken,
-                                                               String message) {
+                                                               String message, Boolean rememberMe) {
         redisTokenService.revokeAllUserTokens(user.getId());
+        if(rememberMe){
+            redisTokenService.saveToken(user, accessToken, 11520); // 8 days
+            redisTokenService.saveToken(user, refreshToken, 44640); // 31 days
+        }
         redisTokenService.saveToken(user, accessToken, 30);
-        redisTokenService.saveToken(user, refreshToken, 11111);
+        redisTokenService.saveToken(user, refreshToken, 11520);
 
         return AuthenticationResponse.builder()
                 .tokenType(TokenType.BEARER)

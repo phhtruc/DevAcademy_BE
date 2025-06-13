@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
         RoleEntity resolvedRole = resolveRole(request.getRoles());
         associateRoleWithUser(savedUser, resolvedRole);
 
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateToken(user, false);
         tokenService.saveToken(savedUser, token, 1440);
 
         if (file != null && !file.isEmpty()) {
@@ -209,7 +209,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponseDTO(userRepository.save(existingUser));
     }
 
-    private RoleEntity resolveRole(String roleName) {
+    protected RoleEntity resolveRole(String roleName) {
         RoleType roleType;
         if (roleName == null) {
             roleType = RoleType.USER;
@@ -224,7 +224,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ApiException(ErrorCode.ROLE_NAME_NOT_FOUND));
     }
 
-    private void associateRoleWithUser(UserEntity user, RoleEntity role) {
+    protected void associateRoleWithUser(UserEntity user, RoleEntity role) {
         UserHasRoleEntity userHasRole = new UserHasRoleEntity();
         userHasRole.setUserEntity(user);
         userHasRole.setRoleEntity(role);
