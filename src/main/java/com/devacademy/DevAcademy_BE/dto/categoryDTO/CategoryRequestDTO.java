@@ -9,7 +9,6 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryRequestDTO {
     @NotBlank(message = "CATEGORY_NAME_INVALID")
