@@ -43,7 +43,8 @@ public class SecurityConfig {
                                 "/api/v1/chapters/{idChapter}/lessons",
                                 "/api/v1/categories",
                                 "/api/v1/users/courses",
-                                "/api/v1/lessons/{id}")
+                                "/api/v1/lessons/{id}",
+                                "/api/v1/comments/lessons/{id}")
                         .permitAll()
                         .requestMatchers("/api/v1/comments/**",
                                 "/api/v1/payments/**",

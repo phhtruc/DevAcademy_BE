@@ -9,7 +9,6 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TechStackRequestDTO {
     @NotBlank(message = "TECH_STACK_NAME_INVALID")

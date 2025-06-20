@@ -177,7 +177,9 @@ public class CourseServiceImpl implements CourseService {
         course.setId(id);
         course.setIsDeleted(false);
         if (file != null && !file.isEmpty()) {
-            course.setThumbnailUrl(cloudinaryService.uploadImage(file));
+            String rawUrl = cloudinaryService.uploadImage(file);
+            String secureUrl = ensureHttpsUrl(rawUrl);
+            course.setThumbnailUrl(secureUrl);
         }
         if(request.getIdCategory() != null && !request.getIdCategory().isBlank()) {
             CategoryEntity categoryEntity = categoryRepository.findById(Long.parseLong(request.getIdCategory()))
@@ -300,5 +302,17 @@ public class CourseServiceImpl implements CourseService {
         }
 
         return (int) daysRemaining;
+    }
+
+    private String ensureHttpsUrl(String url) {
+        if (url == null || url.isBlank()) return null;
+
+        if (url.startsWith("https://")) return url;
+
+        if (url.startsWith("http://")) {
+            return url.replaceFirst("http://", "https://");
+        }
+
+        return "https://" + url;
     }
 }
