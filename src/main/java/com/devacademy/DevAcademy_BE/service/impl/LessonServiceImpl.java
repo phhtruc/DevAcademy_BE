@@ -8,8 +8,10 @@ import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonRequestDTO;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.lessonDTO.LessonSearchDTO;
 import com.devacademy.DevAcademy_BE.entity.LessonEntity;
+import com.devacademy.DevAcademy_BE.entity.ProgressEntity;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
+import com.devacademy.DevAcademy_BE.enums.ProgressType;
 import com.devacademy.DevAcademy_BE.enums.RegisterType;
 import com.devacademy.DevAcademy_BE.enums.TypeLesson;
 import com.devacademy.DevAcademy_BE.exception.ApiException;
@@ -17,6 +19,7 @@ import com.devacademy.DevAcademy_BE.mapper.LessonMapper;
 import com.devacademy.DevAcademy_BE.repository.ChapterRepository;
 import com.devacademy.DevAcademy_BE.repository.CourseRegisterRepository;
 import com.devacademy.DevAcademy_BE.repository.LessonRepository;
+import com.devacademy.DevAcademy_BE.repository.ProgressRepository;
 import com.devacademy.DevAcademy_BE.repository.specification.LessonSpecification;
 import com.devacademy.DevAcademy_BE.service.LessonService;
 import com.devacademy.DevAcademy_BE.service.queue.VideoUploadQueueService;
@@ -51,6 +54,7 @@ public class LessonServiceImpl implements LessonService {
     RedisTemplate<String, VideoStatusResponse> redisTemplate;
     static String REDIS_VIDEO_STATUS_KEY = "video:status:";
     CourseRegisterRepository courseRegisterRepository;
+    ProgressRepository progressRepository;
 
     @Override
     public PageResponse<?> getLessonsByIdChapter(int page, int pageSize, Long idChapter, Long idCourse,
@@ -77,10 +81,17 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public LessonResponseDTO getLessonById(Long id) {
+    public LessonResponseDTO getLessonById(Long id, Authentication auth) {
         var lesson = lessonRepository.findById(id).orElseThrow(() ->
                 new ApiException(ErrorCode.LESSON_NOT_EXISTED));
-        return lessonMapper.toLessonResponseDTO(lesson);
+
+        var lessonMap = lessonMapper.toLessonResponseDTO(lesson);
+
+        if (auth != null && auth.getPrincipal() instanceof UserEntity userEntity) {
+            lessonMap.setIsCompleted(checkCompleted(userEntity.getId(), lesson.getId()));
+        }
+
+        return lessonMap;
     }
 
     @Override
@@ -178,10 +189,33 @@ public class LessonServiceImpl implements LessonService {
                 .build();
     }
 
+    @Override
+    public void updateLessonProgress(Long lessonId, Authentication authentication) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+        LessonEntity lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new ApiException(ErrorCode.LESSON_NOT_EXISTED));
+
+        if (!checkCourseIsPurchased(user.getId(), lesson.getChapterEntity().getCourseEntity().getId())) {
+            throw new ApiException(ErrorCode.COURSE_NOT_PURCHASED);
+        }
+
+        ProgressEntity progress = ProgressEntity.builder()
+                .lessonEntity(lesson)
+                .user(user)
+                .status(ProgressType.COMPLETED)
+                .isDeleted(false)
+                .build();
+        progressRepository.save(progress);
+    }
+
     private boolean checkCourseIsPurchased(UUID userId, Long courseId) {
         return courseRegisterRepository
                 .findByUserEntityIdAndCourseEntityIdAndRegisterType(userId, courseId, RegisterType.BUY)
                 .isPresent();
+    }
+
+    private boolean checkCompleted(UUID userId, Long lessonId) {
+        return progressRepository.existsByUserIdAndLessonEntityIdAndStatus(userId, lessonId, ProgressType.COMPLETED);
     }
 
 }

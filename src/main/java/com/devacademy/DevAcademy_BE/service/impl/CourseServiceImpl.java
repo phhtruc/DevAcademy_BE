@@ -7,6 +7,7 @@ import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseResponseDTO;
 import com.devacademy.DevAcademy_BE.dto.courseDTO.CourseSearchDTO;
 import com.devacademy.DevAcademy_BE.entity.*;
 import com.devacademy.DevAcademy_BE.enums.ErrorCode;
+import com.devacademy.DevAcademy_BE.enums.ProgressType;
 import com.devacademy.DevAcademy_BE.enums.RegisterType;
 import com.devacademy.DevAcademy_BE.exception.ApiException;
 import com.devacademy.DevAcademy_BE.mapper.CategoryMapper;
@@ -53,6 +54,7 @@ public class CourseServiceImpl implements CourseService {
     CourseHasCategoryRepository courseHasCategoryRepository;
     CategoryMapper categoryMapper;
     MailService mailService;
+    ProgressRepository progressRepository;
 
     @Override
     public PageResponse<?> getAllCourse(int page, int size) {
@@ -117,6 +119,10 @@ public class CourseServiceImpl implements CourseService {
     public void deleteCourse(Long id) {
         var course = courseRepository.findById(id).orElseThrow(() ->
                 new ApiException(ErrorCode.COURSE_NOT_EXISTED));
+        Integer regisUser = courseRegisterRepository.countByCourseEntityIdAndRegisterType(id, RegisterType.BUY);
+        if (regisUser > 0) {
+            throw new ApiException(ErrorCode.COURSE_HAS_REGISTRATIONS);
+        }
         course.setIsDeleted(true);
         courseRepository.save(course);
     }
@@ -218,6 +224,8 @@ public class CourseServiceImpl implements CourseService {
                     courseMap.setCategory(getCategory(courseEntity));
                     courseMap.setLessonCount(lessonCount);
                     if (user != null) {
+                        courseMap.setCompletedLessons(getCompletedLessons(user.getId(), courseEntity.getId()));
+                        courseMap.setProgressPercent(getProgressPercent(user.getId(), courseEntity.getId()));
                         courseMap.setIsPurchased(checkCourseIsPurchased(user.getId(), courseEntity.getId()));
                         if (courseMap.getIsPurchased()) {
                             try {
@@ -314,5 +322,16 @@ public class CourseServiceImpl implements CourseService {
         }
 
         return "https://" + url;
+    }
+
+    private int getCompletedLessons(UUID userId, Long courseId) {
+        return progressRepository.countByUserAndLessonCourseAndStatus(userId, courseId, ProgressType.COMPLETED);
+    }
+
+    private int getProgressPercent(UUID userId, Long courseId) {
+        int totalLessons = getLessonCountByCourse(courseId);
+        if (totalLessons == 0) return 0;
+        int completed = getCompletedLessons(userId, courseId);
+        return (completed * 100) / totalLessons;
     }
 }
