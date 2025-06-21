@@ -47,6 +47,7 @@ public class SecurityConfig {
                                 "/api/v1/comments/lessons/{id}")
                         .permitAll()
                         .requestMatchers("/api/v1/comments/**",
+                                "/api/v1/lessons/{id}/progress",
                                 "/api/v1/payments/**",
                                 "/api/v1/submissions/**",
                                 "/api/v1/users/profile",

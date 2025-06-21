@@ -11,6 +11,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,8 +31,8 @@ public class LessonController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getLessonById(@PathVariable Long id) {
-        return JsonResponse.ok(lessonService.getLessonById(id));
+    public ResponseEntity<?> getLessonById(@PathVariable Long id, Authentication auth) {
+        return JsonResponse.ok(lessonService.getLessonById(id, auth));
     }
 
     @PostMapping
@@ -69,6 +70,14 @@ public class LessonController {
                                            @RequestParam(required = false, defaultValue = "1") int page,
                                            @RequestParam(required = false, defaultValue = "10") int pageSize) {
         return JsonResponse.ok(lessonService.searchLessons(searchDTO, page, pageSize));
+    }
+
+    @PostMapping("/{lessonId}/progress")
+    public ResponseEntity<?> updateLessonProgress(@PathVariable Long lessonId,
+                                                  Authentication authentication) {
+        lessonService.updateLessonProgress(lessonId, authentication);
+        return ResponseEntity.ok().build();
+
     }
 
 }

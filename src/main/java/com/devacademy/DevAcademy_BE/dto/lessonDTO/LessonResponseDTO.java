@@ -20,4 +20,5 @@ public class LessonResponseDTO {
     String contentRefer;
     String chapter;
     Boolean isPublic;
+    Boolean isCompleted;
 }

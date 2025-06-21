@@ -16,7 +16,7 @@ import java.util.List;
 public interface LessonService {
     PageResponse<?> getLessonsByIdChapter(int page, int pageSize, Long idChapter, Long idCourse, Authentication auth);
 
-    LessonResponseDTO getLessonById(Long id);
+    LessonResponseDTO getLessonById(Long id, Authentication auth);
 
     LessonResponseDTO addLesson(LessonRequestDTO request, MultipartFile video);
 
@@ -33,4 +33,6 @@ public interface LessonService {
     VideoStatusResponse getVideoUploadStatus(Long id);
 
     PageResponse<?> searchLessons(LessonSearchDTO searchDTO, int page, int pageSize);
+
+    void updateLessonProgress(Long lessonId, Authentication authentication);
 }
