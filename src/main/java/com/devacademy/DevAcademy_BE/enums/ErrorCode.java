@@ -50,6 +50,8 @@ public enum ErrorCode {
     COURSE_TECH_STACK_INVALID(170013, "Course is tech stack must be not null", HttpStatus.NOT_FOUND),
     TECH_STACK_NOT_EXISTED(170014, "Tech stack not exists", HttpStatus.NOT_FOUND),
     DURATION_INVALID(170015, "Duration must be not blank", HttpStatus.NOT_FOUND),
+    COURSE_NOT_PURCHASED(170016, "Course not purchased", HttpStatus.NOT_FOUND),
+    COURSE_HAS_REGISTRATIONS(170017, "Course has registrations", HttpStatus.NOT_FOUND),
 
     // Error code for chapter: 1800**
     CHAPTER_NOT_EXISTED(180001, "Chapter not existed", HttpStatus.NOT_FOUND),
