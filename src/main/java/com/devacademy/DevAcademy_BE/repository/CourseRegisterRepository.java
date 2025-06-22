@@ -5,6 +5,7 @@ import com.devacademy.DevAcademy_BE.enums.RegisterType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,4 +18,7 @@ public interface CourseRegisterRepository extends JpaRepository<CourseRegisterEn
     Integer countByCourseEntityIdAndRegisterType(Long courseId, RegisterType registerType);
 
     Integer countByUserEntityIdAndRegisterType(UUID userEntityId, RegisterType registerType);
+
+    // details
+    List<CourseRegisterEntity> findByUserEntityIdAndRegisterType(UUID studentId, RegisterType registerType);
 }

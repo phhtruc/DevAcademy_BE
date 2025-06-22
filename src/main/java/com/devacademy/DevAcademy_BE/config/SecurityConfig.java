@@ -58,7 +58,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/categories/**",
                                 "/api/v1/tech-stacks/**",
                                 "/api/v1/prompts/**",
-                                "/api/v1/courses/**")
+                                "/api/v1/courses/**",
+                                "/api/v1/teacher/**")
                         .hasAuthority(RoleType.TEACHER.name())
                         .anyRequest().authenticated())
                 .sessionManagement(session
