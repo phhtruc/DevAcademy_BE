@@ -48,6 +48,9 @@ public class UserEntity extends BaseEntity implements UserDetails {
     @OneToMany(mappedBy = "userEntity", fetch = FetchType.EAGER)
     private Set<UserHasRoleEntity> userHasRoles = new HashSet<>();
 
+    @OneToMany(mappedBy = "userEntity")
+    private Set<CourseRegisterEntity> courseRegisters = new HashSet<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return userHasRoles.stream()

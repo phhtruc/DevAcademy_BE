@@ -325,10 +325,10 @@ public class CourseServiceImpl implements CourseService {
     }
 
     private int getCompletedLessons(UUID userId, Long courseId) {
-        return progressRepository.countByUserAndLessonCourseAndStatus(userId, courseId, ProgressType.COMPLETED);
+        return progressRepository.countDistinctLessonsByUserAndCourseAndStatus(userId, courseId, ProgressType.COMPLETED);
     }
 
-    private int getProgressPercent(UUID userId, Long courseId) {
+    protected int getProgressPercent(UUID userId, Long courseId) {
         int totalLessons = getLessonCountByCourse(courseId);
         if (totalLessons == 0) return 0;
         int completed = getCompletedLessons(userId, courseId);
