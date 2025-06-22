@@ -16,6 +16,7 @@ import com.devacademy.DevAcademy_BE.repository.CourseRegisterRepository;
 import com.devacademy.DevAcademy_BE.repository.CourseRepository;
 import com.devacademy.DevAcademy_BE.repository.ProgressRepository;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
+import com.devacademy.DevAcademy_BE.repository.specification.StudentSpecification;
 import com.devacademy.DevAcademy_BE.service.TeacherService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,5 +136,35 @@ public class TeacherServiceImpl implements TeacherService {
                     .lastAccessedDate(lastAccessDate)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public PageResponse<?> searchStudent(int page, int pageSize, Long courseId, String name) {
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, pageSize);
+
+        Specification<UserEntity> spec = Specification
+                .where(StudentSpecification.hasEnrollment())
+                .and(StudentSpecification.enrolledInCourse(courseId))
+                .and(StudentSpecification.hasNameOrEmail(name));
+
+        Page<UserEntity> students = userRepository.findAll(spec, pageable);
+
+        List<StudentResponseDTO> studentDTOs = students.getContent().stream()
+                .map(user -> StudentResponseDTO.builder()
+                        .id(user.getId())
+                        .name(user.getFullName())
+                        .email(user.getEmail())
+                        .avatar(user.getAvatar())
+                        .lastActivityDate(progressRepository.findLastActivityDateByStudent(user.getId())
+                                .orElse(user.getModifiedDate()))
+                        .build())
+                .collect(Collectors.toList());
+
+        return PageResponse.builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalPage(students.getTotalPages())
+                .items(studentDTOs)
+                .build();
     }
 }

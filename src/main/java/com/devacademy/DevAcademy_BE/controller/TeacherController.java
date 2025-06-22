@@ -1,5 +1,6 @@
 package com.devacademy.DevAcademy_BE.controller;
 
+import com.devacademy.DevAcademy_BE.dto.userDTO.UserSearchDTO;
 import com.devacademy.DevAcademy_BE.service.TeacherService;
 import com.devacademy.DevAcademy_BE.util.JsonResponse;
 import lombok.AccessLevel;
@@ -39,5 +40,13 @@ public class TeacherController {
     @GetMapping("/students/{studentId}/courses")
     public ResponseEntity<?> getStudentCourseDetails(@PathVariable UUID studentId) {
         return JsonResponse.ok(teacherService.getStudentCourseDetails(studentId));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchStudent(@RequestParam(required = false, defaultValue = "1") int page,
+                                           @RequestParam(required = false, defaultValue = "10") int pageSize,
+                                           @RequestParam(required = false) Long courseId,
+                                           @RequestParam(required = false) String name) {
+        return JsonResponse.ok(teacherService.searchStudent(page, pageSize, courseId, name));
     }
 }

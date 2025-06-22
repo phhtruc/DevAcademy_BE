@@ -14,4 +14,6 @@ public interface TeacherService {
     Object getStudentsStats();
 
     List<StudentCourseDetailsDTO> getStudentCourseDetails(UUID studentId);
+
+    PageResponse<?> searchStudent(int page, int pageSize, Long courseId, String name);
 }
