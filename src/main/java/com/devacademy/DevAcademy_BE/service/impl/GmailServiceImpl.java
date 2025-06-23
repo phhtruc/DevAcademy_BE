@@ -28,8 +28,8 @@ public class GmailServiceImpl implements MailService {
     @Value("${app.frontend.url}")
     String frontendUrl;
 
-
-    static String SPRING_MAIL_USERNAME = System.getenv("SPRING_MAIL_USERNAME");
+    //static String SPRING_MAIL_USERNAME = System.getenv("SPRING_MAIL_USERNAME");
+    static String SPRING_MAIL_USERNAME = "kientruc582@gmail.com";
 
     @Override
     public void setUpAccount(String userName, String resetLink, String toEmail, String subject) {
