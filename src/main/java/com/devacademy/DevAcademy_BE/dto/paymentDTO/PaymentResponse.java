@@ -13,4 +13,5 @@ public class PaymentResponse {
     String paymentUrl;
     String txnRef;
     Long amount;
+    String sessionId;
 }
