@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +18,13 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PaymentController {
 
-    PaymentService paymentService;
+    ApplicationContext applicationContext;
 
     @PostMapping("/create-payment-url")
     public ResponseEntity<?> createPaymentUrl(@RequestBody PaymentRequest paymentRequest,
                                               HttpServletRequest request) {
+        PaymentService paymentService = (PaymentService) applicationContext
+                .getBean(paymentRequest.getPaymentMethod());
         return JsonResponse.ok(paymentService.createPaymentUrl(paymentRequest, request));
     }
 
@@ -29,7 +32,21 @@ public class PaymentController {
     public ResponseEntity<?> paymentReturn(HttpServletRequest request,
                                            Authentication authentication,
                                            @RequestParam String courseName,
-                                           @RequestParam Long courseId) {
+                                           @RequestParam Long courseId,
+                                           @RequestParam String provider) {
+        PaymentService paymentService = (PaymentService) applicationContext.getBean(provider);
+
+        return JsonResponse.ok(paymentService.processPaymentReturn(request, authentication, courseName, courseId));
+    }
+
+    @GetMapping("/payment-return/stripe")
+    public ResponseEntity<?> stripeReturn(HttpServletRequest request,
+                                          Authentication authentication,
+                                          @RequestParam String courseName,
+                                          @RequestParam Long courseId,
+                                          @RequestParam String provider) {
+        PaymentService paymentService = (PaymentService) applicationContext.getBean(provider);
+
         return JsonResponse.ok(paymentService.processPaymentReturn(request, authentication, courseName, courseId));
     }
 }

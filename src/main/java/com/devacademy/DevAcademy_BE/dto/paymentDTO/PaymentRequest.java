@@ -19,4 +19,5 @@ public class PaymentRequest {
     String email;
     String courseName;
     String language;
+    String paymentMethod;
 }

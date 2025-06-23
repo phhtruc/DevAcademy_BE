@@ -5,8 +5,8 @@ public enum PayType {
     QR_CODE,
     VISA,
     CASH,
-    TRANSFER
-
+    TRANSFER,
+    STRIPE,
     ;
 }
 
