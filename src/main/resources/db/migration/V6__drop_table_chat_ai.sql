@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS lichsu_chat_ai;
