@@ -59,7 +59,8 @@ public class SecurityConfig {
                                 "/api/v1/tech-stacks/**",
                                 "/api/v1/prompts/**",
                                 "/api/v1/courses/**",
-                                "/api/v1/teacher/**")
+                                "/api/v1/teacher/**",
+                                "api/v1/notifications/**")
                         .hasAuthority(RoleType.TEACHER.name())
                         .anyRequest().authenticated())
                 .sessionManagement(session

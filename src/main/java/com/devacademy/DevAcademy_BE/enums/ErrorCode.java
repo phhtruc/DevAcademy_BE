@@ -108,6 +108,9 @@ public enum ErrorCode {
     // submission : 2700*
     SUBMISSION_NOT_FOUND(27000, "Submission not found", HttpStatus.BAD_REQUEST),
 
+    // notification : 2700*
+    EMAIL_SEND_FAILED(28000,"Email Send Failed" ,HttpStatus.BAD_REQUEST ),
+
     ;
 
     Integer code;
