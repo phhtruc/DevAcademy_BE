@@ -14,4 +14,8 @@ public interface MailService {
     void forgotPassword(String resetLink, String toEmail, String subject);
 
     void sendCourseReminder(String userName, String courseName, String toEmail, String subject, Long courseId);
+
+    void sendAccountStatusChangeNotification(String userName, String email, boolean isActive, String subject);
+
+    void sendAccountDeletionNotification(String userName, String email, String subject);
 }

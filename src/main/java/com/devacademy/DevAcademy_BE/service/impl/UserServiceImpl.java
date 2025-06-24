@@ -1,7 +1,7 @@
 package com.devacademy.DevAcademy_BE.service.impl;
 
 import com.devacademy.DevAcademy_BE.dto.PageResponse;
-import com.devacademy.DevAcademy_BE.dto.UserRegistrationTask;
+import com.devacademy.DevAcademy_BE.dto.queue.UserRegistrationTask;
 import com.devacademy.DevAcademy_BE.dto.userDTO.*;
 import com.devacademy.DevAcademy_BE.entity.RoleEntity;
 import com.devacademy.DevAcademy_BE.entity.UserEntity;
@@ -17,7 +17,8 @@ import com.devacademy.DevAcademy_BE.repository.RoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserHasRoleRepository;
 import com.devacademy.DevAcademy_BE.repository.UserRepository;
 import com.devacademy.DevAcademy_BE.repository.specification.UserSpecification;
-import com.devacademy.DevAcademy_BE.service.*;
+import com.devacademy.DevAcademy_BE.service.JwtService;
+import com.devacademy.DevAcademy_BE.service.UserService;
 import com.devacademy.DevAcademy_BE.service.cloudinary.CloudinaryService;
 import com.devacademy.DevAcademy_BE.service.queue.UserRegistrationQueueService;
 import com.devacademy.DevAcademy_BE.service.token.TokenService;
@@ -26,6 +27,7 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +44,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
 
@@ -68,16 +71,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO setActive(UUID id) {
-        UserEntity userEntity = userRepository.findById(id)
+        UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
-        if (userEntity.getStatus() != UserStatus.INACTIVE) {
-            userEntity.setStatus(UserStatus.INACTIVE);
-        } else {
-            userEntity.setStatus(UserStatus.ACTIVE);
+
+        boolean newStatus = user.getStatus() != UserStatus.ACTIVE;
+        user.setStatus(newStatus ? UserStatus.ACTIVE : UserStatus.INACTIVE);
+        UserEntity savedUser = userRepository.save(user);
+
+        if (!newStatus) {
+            tokenService.revokeAllUserTokens(user.getId());
         }
-        userRepository.save(userEntity);
-        tokenService.revokeAllUserTokens(userEntity.getId());
-        return userMapper.toUserResponseDTO(userEntity);
+
+        userRegistrationQueueService.addToQueue(
+                UserRegistrationTask.statusChange(id, newStatus)
+        );
+
+
+        return userMapper.toUserResponseDTO(savedUser);
     }
 
     @Override
@@ -161,9 +171,17 @@ public class UserServiceImpl implements UserService {
         tokenService.saveToken(savedUser, token, 1440);
 
         if (file != null && !file.isEmpty()) {
-            userRegistrationQueueService.addToQueue(new UserRegistrationTask(file, savedUser.getId(), token));
+            byte[] fileContent = file.getBytes();
+            String originalFilename = file.getOriginalFilename();
+            String contentType = file.getContentType();
+
+            userRegistrationQueueService.addToQueue(
+                    UserRegistrationTask.registration(fileContent, originalFilename, contentType, savedUser.getId(), token)
+            );
         } else {
-            userRegistrationQueueService.addToQueue(new UserRegistrationTask(null, savedUser.getId(), token));
+            userRegistrationQueueService.addToQueue(
+                    UserRegistrationTask.registration(null, null, null, savedUser.getId(), token)
+            );
         }
 
         UserResponseDTO userMap = userMapper.toUserResponseDTO(savedUser);
@@ -182,10 +200,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUserById(UUID id) {
-        var user = userRepository.findById(id)
+        UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new ApiException(ErrorCode.USER_NOT_FOUND));
+
+        tokenService.revokeAllUserTokens(user.getId());
+
         user.setIsDeleted(true);
         userRepository.save(user);
+
+        userRegistrationQueueService.addToQueue(UserRegistrationTask.deletion(id));
     }
 
     @Transactional

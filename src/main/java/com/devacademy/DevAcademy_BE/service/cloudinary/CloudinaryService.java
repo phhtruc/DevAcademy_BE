@@ -9,7 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -24,6 +26,17 @@ public class CloudinaryService {
                 ObjectUtils.asMap("secure", true)
         );
         return (String) uploadResult.get("url");
+    }
+
+    public String uploadImage(File file, String originalFilename, String contentType) throws IOException {
+
+        Map<String, String> params = new HashMap<>();
+        params.put("public_id", UUID.randomUUID().toString());
+        params.put("resource_type", "auto");
+
+        Map<?, ?> uploadResult = cloudinary.uploader().upload(file, params);
+
+        return uploadResult.get("url").toString();
     }
 
     public String uploadLargeVideo(MultipartFile multipartFile) throws IOException {

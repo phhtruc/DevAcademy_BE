@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -22,4 +23,6 @@ public class UserResponseDTO implements Serializable {
     UserStatus status;
     String roles;
     String email;
+    LocalDateTime createdDate;
+    LocalDateTime modifiedDate;
 }
