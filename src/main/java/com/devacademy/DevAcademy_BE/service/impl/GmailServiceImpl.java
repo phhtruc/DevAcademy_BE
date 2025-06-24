@@ -59,6 +59,27 @@ public class GmailServiceImpl implements MailService {
     }
 
     @Override
+    public void sendAccountStatusChangeNotification(String userName, String email, boolean isActive, String subject) {
+        Context context = new Context(Locale.getDefault());
+        context.setVariable("userName", userName);
+        context.setVariable("isActive", isActive);
+        context.setVariable("frontendUrl", frontendUrl);
+
+        String htmlContent = templateEngine.process("emails/account-status-change", context);
+        sendHtmlEmail(email, subject, htmlContent);
+    }
+
+    @Override
+    public void sendAccountDeletionNotification(String userName, String email, String subject) {
+        Context context = new Context(Locale.getDefault());
+        context.setVariable("userName", userName);
+        context.setVariable("frontendUrl", frontendUrl);
+
+        String htmlContent = templateEngine.process("emails/account-deletion", context);
+        sendHtmlEmail(email, subject, htmlContent);
+    }
+
+    @Override
     public void buyCourseMail(String userName, Long courseId, String courseName, String toEmail, String subject) {
         Context context = createContext(userName, courseName, courseId);
         String htmlContent = templateEngine.process("emails/buy-course-user", context);

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo xóa tài khoản</title>
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 2px solid #db4437;
+        }
+
+        .header {
+            background-color: #db4437;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .content {
+            padding: 30px 25px;
+            background-color: #f9f9f9;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .content p {
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #999999;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+
+        .footer strong {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header">
+        <h1>Tài khoản đã bị xóa</h1>
+    </div>
+
+    <div class="content">
+        <p>Kính gửi <span th:text="${userName}">người dùng</span>,</p>
+
+        <p>Chúng tôi xin thông báo rằng tài khoản DevAcademy của bạn đã bị xóa khỏi hệ thống của chúng tôi.</p>
+
+        <p>Nếu bạn không yêu cầu thao tác này hoặc cho rằng đây là một sai sót, vui lòng liên hệ với quản trị viên của chúng tôi càng sớm càng tốt.</p>
+
+        <p>Nếu bạn muốn đăng ký lại tài khoản mới, bạn có thể truy cập trang web của chúng tôi:</p>
+
+        <p style="text-align: center;">
+            <a class="button" th:href="${frontendUrl}" target="_blank">Truy cập DevAcademy</a>
+        </p>
+
+        <p>Trân trọng,<br>Đội ngũ DevAcademy</p>
+    </div>
+
+    <div class="footer">
+        <p>© 2024 DevAcademy. Mọi quyền được bảo lưu.</p>
+        <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+    </div>
+</div>
+</body>
+</html>
