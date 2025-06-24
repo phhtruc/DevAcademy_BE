@@ -12,4 +12,6 @@ public interface MailService {
     void setUpAccount(String userName, String resetLink, String toEmail, String subject) throws MessagingException;
 
     void forgotPassword(String resetLink, String toEmail, String subject);
+
+    void sendCourseReminder(String userName, String courseName, String toEmail, String subject, Long courseId);
 }

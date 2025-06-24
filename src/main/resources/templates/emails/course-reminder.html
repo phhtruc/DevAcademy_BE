@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Nhắc nhở khóa học</title>
+  <style>
+    body {
+      background-color: #f4f4f4;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .email-container {
+      max-width: 600px;
+      margin: 30px auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      border: 2px solid #0084ff;
+    }
+
+    .header {
+      background-color: #0084ff;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .content {
+      padding: 30px 25px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .content h2 {
+      color: #0084ff;
+      margin-top: 0;
+    }
+
+    .content p {
+      line-height: 1.6;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: #0084ff;
+      color: white;
+      padding: 12px 24px;
+      text-decoration: none;
+      border-radius: 6px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #999999;
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+
+    .footer strong {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+<div class="email-container">
+  <div class="header">
+    <h1>Nhắc nhở tiếp tục học tập</h1>
+  </div>
+  <div class="content">
+    <h2>Chào <span th:text="${userName}">Học viên</span>,</h2>
+    <p>
+      Chúng tôi nhận thấy bạn đã đăng ký khóa học <strong th:text="${courseName}">Tên khóa học</strong> nhưng có vẻ bạn đã không tham gia học một thời gian.
+    </p>
+    <p>
+      Hãy quay lại và tiếp tục hành trình học tập của mình để đạt được kết quả tốt nhất nhé!
+    </p>
+    <a th:href="${frontendUrl + '/khoa-hoc/' + courseId}" class="button">👉 Tiếp tục học ngay</a>
+  </div>
+  <div class="footer">
+    <p>Cảm ơn bạn đã tin tưởng và lựa chọn nền tảng của chúng tôi.</p>
+    <p><strong>DevAcademy</strong>, An Khê, Thanh Khê, Đà Nẵng</p>
+  </div>
+</div>
+</body>
+</html>
