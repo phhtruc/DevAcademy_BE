@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -37,14 +38,14 @@ public class LessonController {
 
     @PostMapping
     public ResponseEntity<?> addLesson(@ModelAttribute @Valid LessonRequestDTO request,
-                                       @RequestParam(required = false) MultipartFile files) {
+                                       @RequestParam(required = false) MultipartFile files) throws IOException {
         return JsonResponse.ok(lessonService.addLesson(request, files));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateLesson(@PathVariable Long id,
                                           @ModelAttribute @Valid LessonRequestDTO request,
-                                          @RequestParam(required = false) MultipartFile files) {
+                                          @RequestParam(required = false) MultipartFile files) throws IOException {
         return JsonResponse.ok(lessonService.updateLesson(id, request, files));
     }
 

@@ -37,6 +37,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -95,7 +96,7 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public LessonResponseDTO addLesson(LessonRequestDTO request, MultipartFile video) {
+    public LessonResponseDTO addLesson(LessonRequestDTO request, MultipartFile video) throws IOException {
         chapterRepository.findById(Long.parseLong(request.getChapterId()))
                 .orElseThrow(() -> new ApiException(ErrorCode.CHAPTER_NOT_FOUND));
         var lesson = lessonMapper.toLessonEntity(request);
@@ -105,7 +106,6 @@ public class LessonServiceImpl implements LessonService {
 
         var savedLesson = lessonRepository.save(lesson);
 
-        // Đưa video vào hàng đợi upload
         if (video != null && !video.isEmpty()) {
             videoUploadQueueService.addToQueue(new VideoUploadTask(video, savedLesson.getId()));
         }
@@ -114,7 +114,7 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public LessonResponseDTO updateLesson(Long id, LessonRequestDTO request, MultipartFile video) {
+    public LessonResponseDTO updateLesson(Long id, LessonRequestDTO request, MultipartFile video) throws IOException {
         var existingLesson = lessonRepository.findById(id).orElseThrow(() ->
                 new ApiException(ErrorCode.LESSON_NOT_EXISTED));
         chapterRepository.findById(Long.parseLong(request.getChapterId()))

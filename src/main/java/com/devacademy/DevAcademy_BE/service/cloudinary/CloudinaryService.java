@@ -60,6 +60,21 @@ public class CloudinaryService {
 
         return (String) uploadResult.get("url");
     }
+
+    public String uploadLargeVideo(File videoFile) throws IOException {
+        Map<String, Object> options = ObjectUtils.asMap(
+                "resource_type", "video",
+                "folder", "videos",
+                "use_filename", true,
+                "unique_filename", true,
+                "overwrite", false,
+                "secure", true
+        );
+
+        Map uploadResult = cloudinary.uploader().upload(videoFile, options);
+
+        return (String) uploadResult.get("url");
+    }
 }
 
 

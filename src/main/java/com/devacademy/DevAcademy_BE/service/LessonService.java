@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -18,9 +19,9 @@ public interface LessonService {
 
     LessonResponseDTO getLessonById(Long id, Authentication auth);
 
-    LessonResponseDTO addLesson(LessonRequestDTO request, MultipartFile video);
+    LessonResponseDTO addLesson(LessonRequestDTO request, MultipartFile video) throws IOException;
 
-    LessonResponseDTO updateLesson(Long id, LessonRequestDTO request, MultipartFile video);
+    LessonResponseDTO updateLesson(Long id, LessonRequestDTO request, MultipartFile video) throws IOException;
 
     void deleteLesson(Long id);
 

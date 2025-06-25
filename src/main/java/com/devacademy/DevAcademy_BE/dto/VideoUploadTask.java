@@ -1,14 +1,21 @@
 package com.devacademy.DevAcademy_BE.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+import java.io.IOException;
+
+@Getter
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class VideoUploadTask {
-    private MultipartFile video;
-    private Long lessonId;
+    byte[] videoContent;
+    String originalFilename;
+    Long lessonId;
+
+    public VideoUploadTask(MultipartFile file, Long lessonId) throws IOException {
+        this.videoContent = file.getBytes();
+        this.originalFilename = file.getOriginalFilename();
+        this.lessonId = lessonId;
+    }
 }
