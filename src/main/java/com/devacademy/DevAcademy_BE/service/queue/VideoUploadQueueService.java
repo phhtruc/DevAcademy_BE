@@ -81,7 +81,14 @@ public class VideoUploadQueueService {
         try {
             updateVideoStatusInRedis(lessonId, VideoUploadStatus.PROCESSING, null, null);
 
-            String videoUrl = cloudinaryService.uploadLargeVideo(task.getVideo());
+            java.io.File tempFile = java.io.File.createTempFile("video_", "_upload");
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(tempFile)) {
+                fos.write(task.getVideoContent());
+            }
+
+            String videoUrl = cloudinaryService.uploadLargeVideo(tempFile);
+
+            tempFile.delete();
 
             lessonRepository.findById(lessonId).ifPresent(lesson -> {
                 lesson.setVideoUrl(videoUrl);
@@ -93,8 +100,9 @@ public class VideoUploadQueueService {
             log.info("Upload thành công cho lessonId: {}", lessonId);
 
         } catch (Exception e) {
+            updateVideoStatusInRedis(lessonId, VideoUploadStatus.FAILED, null, e.getMessage());
             log.error("Error uploading video for lessonId {}: {}, task: {}",
-                    lessonId, e.getMessage(), task.getVideo().getOriginalFilename());
+                    lessonId, e.getMessage(), task.getOriginalFilename());
         }
     }
 
