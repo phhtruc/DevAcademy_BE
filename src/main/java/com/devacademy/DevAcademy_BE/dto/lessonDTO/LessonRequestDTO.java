@@ -19,7 +19,7 @@ public class LessonRequestDTO {
     @NotBlank(message = "LESSON_TYPE_INVALID")
     @Pattern(regexp = "READINGS|LECTURES|EXERCISES", message = "COURSE_TYPE_INVALID_TYPE")
     String type;
-    @NotBlank(message = "LESSON_CONTENT_INVALID")
+    //@NotBlank(message = "LESSON_CONTENT_INVALID")
     String content;
     String videoUrl;
     String contentRefer;
