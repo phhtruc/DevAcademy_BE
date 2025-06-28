@@ -88,7 +88,7 @@ public class SubmissionServiceImpl implements SubmissionService {
             Map<String, String> textFiles = extractTextFilesFromZip(file.getInputStream());
 
             var resultReview = AIService.reviewCode(contentProcess(textFiles, requestDTO));
-            addSubmit(requestDTO.getGithubLink(), resultReview, authentication, requestDTO.getIdExercise());
+            addSubmit(file.getOriginalFilename(), resultReview, authentication, requestDTO.getIdExercise());
             return resultReview;
         } else {
             throw new ApiException(ErrorCode.MISSING_SUBMISSION_DATA);
@@ -243,6 +243,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         }
         var submit = SubmissionEntity.builder()
                 .submissionLink(githubLink)
+                .file(githubLink)
                 .review(resultReview)
                 .user(user)
                 .isDeleted(false)

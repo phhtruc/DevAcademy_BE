@@ -40,12 +40,12 @@ public class PromptServiceImpl implements PromptService {
 
     @Override
     public PromptResponseDTO updateConfig(Long id, PromptRequestDTO config) {
-        promptRepository.findById(id)
+        var prompt = promptRepository.findById(id)
                 .orElseThrow(() -> new ApiException(ErrorCode.PROMPT_NOT_FOUNT));
         var promptMapperEntity = promptMapper.toPromptEntity(config);
         promptMapperEntity.setIsDeleted(false);
         promptMapperEntity.setId(id);
-        promptMapperEntity.setIsActive(false);
+        promptMapperEntity.setIsActive(prompt.getIsActive());
         return promptMapper.toPromptConfigResponseDTO(promptRepository.save(promptMapperEntity));
     }
 
