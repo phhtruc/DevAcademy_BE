@@ -10,5 +10,5 @@ public class SubmitRequestDTO {
     String exerciseTitle;
     String idExercise;
     String idCourse;
-    String language = "vietnamese";
+    String content;
 }

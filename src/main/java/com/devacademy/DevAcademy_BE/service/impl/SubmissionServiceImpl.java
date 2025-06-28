@@ -214,7 +214,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                 .map(PromptEntity::getContentStruct)
                 .orElseThrow(() -> new ApiException(ErrorCode.PROMPT_NOT_FOUNT_ERROR));
 
-        prompt = prompt.formatted(requestDTO.getExerciseTitle(), requestDTO.getLanguage());
+        prompt = prompt.formatted(requestDTO.getExerciseTitle(), requestDTO.getContent());
 
         messageBuilder.append(prompt).append("\n\n");
 
