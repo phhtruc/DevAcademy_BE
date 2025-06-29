@@ -27,7 +27,7 @@ public interface ProgressRepository extends JpaRepository<ProgressEntity, Long> 
     boolean existsByUserIdAndLessonEntityIdAndStatus(UUID userId, Long lessonId, ProgressType status);
 
     // status
-    @Query("SELECT MAX(p.modifiedDate) FROM ProgressEntity p WHERE p.user.id = :studentId")
+    @Query("SELECT MAX(p.createdDate) FROM ProgressEntity p WHERE p.user.id = :studentId")
     Optional<LocalDateTime> findLastActivityDateByStudent(@Param("studentId") UUID studentId);
 
     // details
